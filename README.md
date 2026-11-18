@@ -11,6 +11,8 @@ A household budget tracker for one or two people. Logging a cost is one line: `t
 - **Activity** (list icon, top right): every entry, searchable.
 - **Settings** (sliders icon): sync between phones, names, style, shorthand guide, learned merchants, backup.
 
+It knows about 180 UK shops and brands, including nicknames and typos: `sains` is Sainsbury's, `maccies` is McDonald's, `spoons` is Wetherspoons, `tescp` is Tesco. Correct a name once (in the preview or by editing an entry) and it remembers that spelling on both phones.
+
 Savings and investments (`stocks and shares isa 300 adam`, `emergency fund 150`, `pension 400`) are recorded as **saved or invested**, never as spending.
 
 ## Put it online (Netlify, free)

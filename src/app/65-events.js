@@ -59,6 +59,7 @@ document.addEventListener('click', (e) => {
   }
   if (t.closest('[data-keep-examples]')) { S.exKeep = true; save(); renderHome(); return; }
   if ((b = t.closest('[data-default-who]'))) { S.defaultWho = b.dataset.defaultWho; save(); refresh(); return; }
+  if ((b = t.closest('[data-unalias]'))) { const k = b.dataset.unalias, v = S.aliases[k]; delete S.aliases[k]; save(); refresh(); return toast(`Forgot “${k}”`, () => { S.aliases[k] = v; save(); refresh(); }); }
   if ((b = t.closest('[data-unlearn]'))) { const k = b.dataset.unlearn, v = S.learned[k]; delete S.learned[k]; save(); refresh(); return toast(`Forgot ${TP.titleCase(k)}`, () => { S.learned[k] = v; save(); refresh(); }); }
   if (t.closest('[data-export]')) {
     try {

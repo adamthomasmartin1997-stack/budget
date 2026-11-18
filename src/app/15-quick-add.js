@@ -112,6 +112,8 @@ function submitQuick() {
     const auto = TP.keywordCategory(mkey) || 'other';
     if (qa.ov.cat === auto) delete S.learned[mkey]; else S.learned[mkey] = qa.ov.cat;
   }
+  // Learning names: if the name was corrected in the preview, that spelling means the corrected name from now on.
+  if (qa.ov.desc !== undefined) learnAlias(p.rawKey, desc);
   if (p.recur && p.type !== 'in') {
     const f = { id: uid(), desc, amt: p.amt, day: +p.date.slice(8), cat: p.cat, who: isPair() ? p.who || S.defaultWho : null, start: monthOf(p.date), posted: [monthOf(p.date)], active: true };
     S.fixed.push(f);
@@ -119,7 +121,7 @@ function submitQuick() {
     toast(`${desc} ${money(p.amt)} logged · repeats on the ${ordinal(f.day)} monthly`, () => {
       S.txns = S.txns.filter((x) => x.id !== tx.id); S.fixed = S.fixed.filter((x) => x.id !== f.id); save(); refresh();
     });
-  } else addTxn({ amt: p.amt, type: p.type, desc, mkey, cat: p.cat, date: p.date, who: p.who }, { learnedBefore });
+  } else addTxn({ amt: p.amt, type: p.type, desc, mkey, rawKey: p.rawKey || undefined, cat: p.cat, date: p.date, who: p.who }, { learnedBefore });
   qa.input.value = '';
   qa.ov = {};
   renderChip();
@@ -225,4 +227,12 @@ function whoChooser(sel) {
   const opts = ['shared'].concat(S.people);
   return `<div class="datelist">${opts.map((w) => `<button type="button" data-act="who" data-v="${esc(w)}" aria-pressed="${w === sel}">${esc(whoLabel(w))}</button>`).join('')}</div>
     <p class="hint" style="margin-top:12px">The dropdown next to the box sets this for every new entry. Typing a name, “joint” or “split” changes it for one entry.</p>`;
+}
+
+/** Remember that a typed name means another, e.g. "js" -> "Sainsbury's". Ordinary words like "coffee" are never redirected. */
+function learnAlias(raw, name) {
+  raw = String(raw || '');
+  if (!raw || !name || raw === TP.normKey(name) || raw.length > 24 || TP.keywordCategory(raw)) return false;
+  S.aliases[raw] = name;
+  return true;
 }

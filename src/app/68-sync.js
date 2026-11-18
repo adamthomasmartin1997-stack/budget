@@ -19,6 +19,7 @@ function syncRecords() {
   for (const g of S.goals) if (!g.example) r['g:' + g.id] = cleanRec(g);
   for (const [k, cat] of Object.entries(S.learned)) r['l:' + k] = { cat };
   for (const [k, amt] of Object.entries(S.budgets)) r['b:' + k] = { amt };
+  for (const [k, name] of Object.entries(S.aliases || {})) r['a:' + k] = { name };
   r['m:people'] = { people: S.people };
   return r;
 }
@@ -35,6 +36,7 @@ function applyIncoming(changes) {
     else if (kind === 'f') upsert(S.fixed, id, c);
     else if (kind === 'g') upsert(S.goals, id, c);
     else if (kind === 'l') { if (c.x) delete S.learned[id]; else S.learned[id] = c.d.cat; }
+    else if (kind === 'a') { if (c.x) delete S.aliases[id]; else S.aliases[id] = c.d.name; }
     else if (kind === 'b') { if (c.x) delete S.budgets[id]; else S.budgets[id] = c.d.amt; }
     else if (c.k === 'm:people' && !c.x && Array.isArray(c.d.people) && c.d.people.length) {
       S.people = c.d.people.slice(0, 2);

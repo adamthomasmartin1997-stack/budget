@@ -25,6 +25,7 @@ const swatches = () => STYLES.map((p) => `<button type="button" class="stylepick
 function renderPrefs() {
   const el = $('#view-prefs');
   const learned = Object.entries(S.learned);
+  const aliases = Object.entries(S.aliases || {});
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
   const pairCheat = isPair() ? `<dt>petrol 55 ${esc(S.people[0].toLowerCase())}</dt><dd>Tag to ${esc(S.people[0])}</dd><dt>dinner 60 split</dt><dd>Shared cost</dd>` : '';
   el.innerHTML = `<div class="stack">
@@ -48,13 +49,15 @@ function renderPrefs() {
       <dt>tesco 23.40</dt><dd>£23.40 at Tesco, Groceries</dd><dt>23.40 tesco</dt><dd>Same, any order</dd>
       <dt>+2400 salary</dt><dd>Income (or “salary 2400 in”)</dd>${pairCheat}
       <dt>coffee 3.2 yday</dt><dd>Dated yesterday. Also “fri”, “last mon”, “14/11”</dd>
-      <dt>50p</dt><dd>Pence work too, as does “2.4k”</dd><dt>gift 20 #fun</dt><dd>Force a category with #</dd><dt>netflix 10.99 monthly</dt><dd>Make it a fixed cost that repeats</dd>
+      <dt>50p</dt><dd>Pence work too, as does “2.4k”</dd><dt>gift 20 #fun</dt><dd>Force a category with #</dd><dt>netflix 10.99 monthly</dt><dd>Make it a fixed cost that repeats</dd><dt>sains 41.12</dt><dd>Sainsbury's. Nicknames and typos for UK shops work too: maccies, spoons, tescp</dd>
     </dl></div></section>
 
-    <section><div class="sec-h"><h2>Learned merchants</h2></div><div class="card">
+    <section><div class="sec-h"><h2>What it has learned</h2></div><div class="card">
       ${learned.length ? `<div class="setlist">${learned.map(([k, c]) => `<div><span><b>${esc(TP.titleCase(k))}</b> → ${esc((CAT[c] || CAT.other).name)}</span>
         <button type="button" class="link" data-unlearn="${esc(k)}">Forget</button></div>`).join('')}</div>`
         : `<p class="hint">When you change a merchant's category, it's remembered here and used next time.</p>`}
+      ${aliases.length ? `<div class="setlist" style="margin-top:10px">${aliases.map(([k, v]) => `<div><span>“${esc(k)}” means <b>${esc(v)}</b></span>
+        <button type="button" class="link" data-unalias="${esc(k)}">Forget</button></div>`).join('')}</div>` : ''}
     </div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">

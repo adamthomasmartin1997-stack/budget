@@ -1,7 +1,7 @@
 // ---------- State ----------
 function defaultState() {
   return {
-    v: 1, people: ['Me'], setup: false, defaultWho: 'shared', txns: [], learned: {}, fixed: [], recap: {}, goals: [],
+    v: 1, people: ['Me'], setup: false, defaultWho: 'shared', txns: [], learned: {}, aliases: {}, fixed: [], recap: {}, goals: [],
     theme: { style: 'pop', mode: 'system', chosen: true },
     budgets: { groceries: 45000, eating: 15000, transport: 15000, bills: 120000, shopping: 10000, fun: 6000, subs: 4000, home: 5000 },
   };
@@ -41,7 +41,7 @@ function load() {
   try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) { s = null; }
   if (!s || s.v !== 1 || !Array.isArray(s.txns)) { s = defaultState(); seedExamples(s); }
   const d = defaultState();
-  for (const k of ['fixed', 'recap', 'theme', 'goals']) if (!s[k]) s[k] = d[k];
+  for (const k of ['fixed', 'recap', 'theme', 'goals', 'aliases']) if (!s[k]) s[k] = d[k];
   if (!s.theme.chosen) s.theme = d.theme; // Pop became the house style; earlier saves had no explicit choice
   return s;
 }
@@ -53,4 +53,4 @@ let S = load();
 const isPair = () => S.people.length === 2;
 const whoLabel = (w) => (w === 'shared' ? 'Joint' : w || '');
 const whoClass = (w) => (w === 'shared' ? 'shared' : w === S.people[0] ? 'p1' : w === S.people[1] ? 'p2' : 'all');
-const ctx = () => ({ people: S.people, learned: S.learned, defaultWho: isPair() ? S.defaultWho : null });
+const ctx = () => ({ people: S.people, learned: S.learned, aliases: S.aliases, defaultWho: isPair() ? S.defaultWho : null });

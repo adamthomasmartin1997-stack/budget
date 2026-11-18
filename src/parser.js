@@ -77,8 +77,142 @@
   const FILLER = new Set(['at', 'on', 'for', 'from', 'the', 'a', '£', 'gbp', 'quid']);
   const WEEKDAYS = { sun: 0, sunday: 0, mon: 1, monday: 1, tue: 2, tues: 2, tuesday: 2, wed: 3, weds: 3, wednesday: 3,
     thu: 4, thur: 4, thurs: 4, thursday: 4, fri: 5, friday: 5, sat: 6, saturday: 6 };
+  const COMMON = new Set(['week', 'wait', 'with', 'from', 'that', 'this', 'there', 'their', 'water', 'stuff', 'things', 'present', 'parking',
+    'chips', 'chippy', 'cards', 'party', 'drink', 'drinks', 'snack', 'snacks', 'plants', 'paint', 'bills', 'tickets', 'books', 'clothes', 'shoes',
+    'house', 'hotel', 'train', 'trains', 'buses', 'coach', 'night', 'money', 'month', 'today', 'cash', 'nails', 'tyres', 'shops', 'shop', 'market',
+    'delivery', 'deliveries', 'bingo', 'tools', 'ticket', 'games', 'boot', 'chip', 'bolts', 'virginia', 'primary', 'nextdoor', 'service', 'charges', 'sports']);
   const SMALL = new Set(['and', 'of', 'the', 'in', 'for', 'to', 'at']);
   const UPPER = new Set(['isa', 'sipp', 'lisa', 'etf', 's&s', 'aj', 'hl', 'bp', 'tfl', 'ee', 'o2', 'bt', 'kfc', 'm&s', 'b&q', 'h&m', 'tv', 'mot', 'diy', 'ev', 'edf', 'ovo']);
+
+
+  // UK shops and brands: [proper name, category, ...other ways people write it]. Used to tidy names and spot typos.
+  const MERCHANTS = [
+    ['Tesco', 'groceries', 'tescos', 'tesco express', 'tesco extra', 'tesco metro'],
+    ["Sainsbury's", 'groceries', 'sains', 'sainsburys', 'sainsbury', 'sainos', 'sainsburies', 'sainsbos', 'sainsburys local'],
+    ['Asda', 'groceries', 'asdas'],
+    ['Morrisons', 'groceries', 'morrys', 'morries', 'morrison', 'morrissons'],
+    ['Aldi', 'groceries', 'aldis'],
+    ['Lidl', 'groceries', 'lidls'],
+    ['Waitrose', 'groceries', 'waitroses'],
+    ['M&S', 'groceries', 'marks and spencer', 'marks & spencer', 'marks and sparks', 'marks', 'm and s', 'ms food', 'm&s food'],
+    ['Co-op', 'groceries', 'coop', 'co op', 'the coop'],
+    ['Iceland', 'groceries'], ['Ocado', 'groceries'], ['Farmfoods', 'groceries'], ['Costco', 'groceries'], ['Booths', 'groceries'],
+    ["McDonald's", 'eating', 'maccies', 'maccys', 'mackies', 'mcdonalds', 'mcdonald', 'mcds', 'mcd', 'macdonalds', 'mickey ds'],
+    ['KFC', 'eating'], ['Burger King', 'eating', 'bk'], ["Nando's", 'eating', 'nandos'], ['Greggs', 'eating', 'gregs'],
+    ['Pret', 'eating', 'pret a manger'], ['Costa', 'eating', 'costa coffee'], ['Starbucks', 'eating', 'sbux', 'starbs', 'starbucks coffee'],
+    ['Caffè Nero', 'eating', 'nero', 'cafe nero', 'caffe nero'], ['Wetherspoons', 'eating', 'spoons', 'weatherspoons', 'wetherspoon', 'weatherspoon', 'jd wetherspoon'],
+    ['Wagamama', 'eating', 'wagas', 'wagamamas', 'wagamamma'], ['Pizza Express', 'eating', 'pizzaexpress'], ["Domino's", 'eating', 'dominos'],
+    ['Pizza Hut', 'eating'], ['Five Guys', 'eating', '5 guys'], ['Subway', 'eating'], ['Leon', 'eating'], ['Itsu', 'eating'], ['Wasabi', 'eating'],
+    ['Deliveroo', 'eating', 'deliveroos'], ['Uber Eats', 'eating', 'ubereats', 'uber eat'], ['Just Eat', 'eating', 'justeat'],
+    ['Toby Carvery', 'eating', 'toby', 'tobys'], ['Harvester', 'eating'], ['Zizzi', 'eating', 'zizzis'], ['Prezzo', 'eating'], ['Dishoom', 'eating'],
+    ['Tim Hortons', 'eating', 'timmies'], ['Taco Bell', 'eating'], ['Krispy Kreme', 'eating'],
+    ['Shell', 'transport'], ['BP', 'transport'], ['Esso', 'transport'], ['Texaco', 'transport'],
+    ['TfL', 'transport', 'oyster', 'tfl travel'], ['Trainline', 'transport', 'the trainline'], ['Uber', 'transport'], ['Bolt', 'transport'],
+    ['National Express', 'transport'], ['Megabus', 'transport'], ['LNER', 'transport'], ['GWR', 'transport'], ['Avanti', 'transport', 'avanti west coast'],
+    ['RingGo', 'transport', 'ringo', 'ring go'], ['PayByPhone', 'transport', 'pay by phone'], ['JustPark', 'transport', 'just park'],
+    ['Halfords', 'transport'], ['Kwik Fit', 'transport', 'kwikfit'],
+    ['British Gas', 'bills'], ['Octopus Energy', 'bills', 'octopus'], ['EDF', 'bills', 'edf energy'], ['E.ON', 'bills', 'eon', 'e.on next', 'eon next'],
+    ['OVO', 'bills', 'ovo energy'], ['Scottish Power', 'bills'], ['BT', 'bills', 'bt broadband'], ['Sky', 'bills'], ['Virgin Media', 'bills', 'virgin'],
+    ['EE', 'bills'], ['Vodafone', 'bills'], ['O2', 'bills'], ['giffgaff', 'bills', 'giff gaff'], ['Thames Water', 'bills'], ['Severn Trent', 'bills'],
+    ['TV Licence', 'bills', 'tv license', 'tv licensing'],
+    ['Netflix', 'subs'], ['Spotify', 'subs'], ['Disney+', 'subs', 'disney', 'disney plus', 'disneyplus'], ['Amazon Prime', 'subs', 'prime', 'prime video'],
+    ['iCloud', 'subs', 'apple icloud'], ['YouTube Premium', 'subs', 'youtube'], ['Audible', 'subs'], ['NOW', 'subs', 'now tv', 'nowtv'],
+    ['Xbox Game Pass', 'subs', 'game pass', 'gamepass'], ['PlayStation Plus', 'subs', 'ps plus', 'psplus'], ['ChatGPT', 'subs', 'chat gpt'],
+    ['Amazon', 'shopping', 'amzn', 'amazon uk', 'amazon.co.uk'], ['Argos', 'shopping'], ['Primark', 'shopping', 'primarni'], ['Next', 'shopping'],
+    ['Zara', 'shopping'], ['H&M', 'shopping', 'h and m'], ['ASOS', 'shopping'], ['TK Maxx', 'shopping', 'tkmaxx', 'tk max', 'tkmax'],
+    ['John Lewis', 'shopping', 'jlp', 'john lewis and partners'], ['Currys', 'shopping', 'currys pc world', 'pc world'], ['eBay', 'shopping'],
+    ['Vinted', 'shopping'], ['Etsy', 'shopping'], ['Uniqlo', 'shopping'], ['JD Sports', 'shopping', 'jd'], ['Sports Direct', 'shopping'],
+    ['Matalan', 'shopping'], ['B&M', 'shopping', 'b and m', 'bandm'], ['Home Bargains', 'shopping'], ['Poundland', 'shopping'],
+    ['Hobbycraft', 'shopping'], ['Shein', 'shopping'], ['Temu', 'shopping'],
+    ['IKEA', 'home'], ['B&Q', 'home', 'bnq', 'b and q', 'bandq'], ['Wickes', 'home'], ['Screwfix', 'home'], ['Toolstation', 'home'],
+    ['Dunelm', 'home'], ['Homebase', 'home'], ['The Range', 'home'],
+    ['Boots', 'health'], ['Superdrug', 'health'], ['Holland & Barrett', 'health', 'holland and barrett', 'h&b'], ['PureGym', 'health', 'pure gym'],
+    ['The Gym Group', 'health', 'gym group'], ['David Lloyd', 'health'], ['Specsavers', 'health'], ['Vision Express', 'health'],
+    ['Odeon', 'fun'], ['Vue', 'fun'], ['Cineworld', 'fun'], ['Ticketmaster', 'fun'], ['Steam', 'fun'], ['Waterstones', 'fun'],
+    ['WHSmith', 'shopping', 'whsmiths', 'wh smith', 'whs', 'smiths'],
+    ['easyJet', 'travel', 'easy jet'], ['Ryanair', 'travel', 'ryan air'], ['Jet2', 'travel', 'jet 2'], ['British Airways', 'travel', 'ba'],
+    ['Premier Inn', 'travel'], ['Travelodge', 'travel'], ['Airbnb', 'travel', 'air bnb'], ['Booking.com', 'travel', 'booking'], ['Eurostar', 'travel'],
+    ['Smyths', 'kids', 'smyths toys'], ['Pets at Home', 'pets', 'petsathome', 'pets at home'],
+    ['Card Factory', 'gifts', 'cardfactory'], ['Clintons', 'gifts', 'clinton cards'],
+    ['Vanguard', 'invest'], ['Trading 212', 'invest', 'trading212', 't212'], ['Freetrade', 'invest', 'free trade'],
+    ['Hargreaves Lansdown', 'invest', 'hl', 'hargreaves'], ['AJ Bell', 'invest', 'ajbell'], ['Moneybox', 'invest', 'money box'],
+    ['Nutmeg', 'invest'], ['Chip', 'savings'], ['Plum', 'savings'], ['Premium Bonds', 'savings', 'nsi', 'ns&i'],
+  ];
+  const nk = (s) => normKey(s).replace(/[.\-]/g, '').replace(/^the /, '');
+  const MERCH_PHRASE = [], MERCH_WORD = new Map(), MERCH_FUZZY = [];
+  MERCHANTS.forEach((m, i) => {
+    for (const a of [m[0]].concat(m.slice(2))) {
+      const k = nk(a);
+      if (!k) continue;
+      if (k.includes(' ')) MERCH_PHRASE.push([k.split(' '), i]); else if (!MERCH_WORD.has(k)) MERCH_WORD.set(k, i);
+      const flat = k.replace(/ /g, '');
+      if (flat.length >= 5) MERCH_FUZZY.push([flat, i]);
+    }
+  });
+  MERCH_PHRASE.sort((a, b) => b[0].length - a[0].length);
+  const MERCH_NAMES = new Set(MERCHANTS.map((m) => m[0]));
+
+  // Optimal string alignment distance (Levenshtein plus swapped neighbours), capped for speed.
+  function editDistance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    const d = [];
+    for (let i = 0; i <= a.length; i++) { d[i] = [i]; }
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      let rowMin = Infinity;
+      for (let j = 1; j <= b.length; j++) {
+        const c = a[i - 1] === b[j - 1] ? 0 : 1;
+        let v = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, d[i - 2][j - 2] + 1);
+        d[i][j] = v; if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return max + 1;
+    }
+    return d[a.length][b.length];
+  }
+
+  /** Finds a known merchant in one word: exact nickname, then a clear start of a name, then a near-miss spelling. */
+  function merchantForWord(w) {
+    const k = nk(w);
+    if (MERCH_WORD.has(k)) return MERCH_WORD.get(k);
+    if (COMMON.has(k)) return -1; // everyday words ("chips", "delivery") never become shops
+    const bare = k.replace(/'?s$/, '');
+    if (bare !== k && MERCH_WORD.has(bare)) return MERCH_WORD.get(bare);
+    if (WORD_MAP.has(k) || k.length < 4 || !/^[a-z&]+$/.test(k)) return -1;
+    // clear start of a name: at least 4 letters and nearly half the name, and only one shop fits
+    const pre = new Set();
+    for (const [name, i] of MERCH_FUZZY) if (name.startsWith(k) && k !== name && k.length >= Math.ceil(name.length * 0.5)) pre.add(i);
+    if (pre.size === 1) return [...pre][0];
+    if (k.length < 5) return -1;
+    // near-miss spelling: one slip for shorter words, two for long ones, and only if one shop is clearly closest
+    const max = k.length >= 9 ? 2 : 1;
+    let best = -1, bestD = max + 1, tie = false;
+    for (const [name, i] of MERCH_FUZZY) {
+      const dd = editDistance(k, name, max);
+      if (dd < bestD) { bestD = dd; best = i; tie = false; } else if (dd === bestD && i !== best) tie = true;
+    }
+    return bestD <= max && !tie ? best : -1;
+  }
+
+  /** Replaces any shop names in the words with their proper names. Returns {words, cat} (cat of the first shop found). */
+  function tidyMerchants(words) {
+    const out = [];
+    let cat = null;
+    const lw = words.map((w) => nk(w));
+    for (let i = 0; i < words.length;) {
+      let hit = null;
+      for (const [parts, mi] of MERCH_PHRASE) {
+        if (parts.length > 1 && parts.every((p, j) => lw[i + j] === p)) { hit = [parts.length, mi]; break; }
+      }
+      if (!hit) { const mi = merchantForWord(words[i]); if (mi >= 0) hit = [1, mi]; }
+      if (hit) {
+        out.push(MERCHANTS[hit[1]][0]);
+        if (!cat) cat = MERCHANTS[hit[1]][1];
+        i += hit[0];
+      } else { out.push(words[i]); i++; }
+    }
+    return { words: out, cat };
+  }
 
   function iso(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -238,13 +372,27 @@
       if (FILLER.has(lows[i])) continue;
       words.push(tokens[i]);
     }
-    const descRaw = words.join(' ');
-    out.mkey = normKey(descRaw);
-    out.desc = titleCase(descRaw);
+    let descRaw = words.join(' ');
+    out.rawKey = normKey(descRaw); // what was typed, before tidying, so a correction can be learned
+    let merchantCat = null;
+    const aliases = ctx.aliases || {};
+    if (descRaw && aliases[normKey(descRaw)]) {
+      // a name this household corrected before, e.g. "js" -> "Sainsbury's"
+      descRaw = aliases[normKey(descRaw)];
+      out.desc = descRaw;
+      const t = tidyMerchants([descRaw]); merchantCat = t.cat || keywordCategory(normKey(descRaw));
+    } else {
+      const t = tidyMerchants(words);
+      merchantCat = t.cat;
+      out.desc = t.words.map((w, i) => (MERCH_NAMES.has(w) ? w : titleCase(w).replace(/^./, (c) => (i > 0 && SMALL.has(w.toLowerCase()) ? c.toLowerCase() : c)))).join(' ');
+    }
+    out.mkey = normKey(out.desc);
+    out.merchant = !!merchantCat;
 
     // 4. category
     if (explicitCat) { out.cat = explicitCat; out.catSource = 'explicit'; }
     else if (out.mkey && learned[out.mkey]) { out.cat = learned[out.mkey]; out.catSource = 'learned'; }
+    else if (merchantCat) { out.cat = merchantCat; out.catSource = 'keyword'; }
     else {
       const k = keywordCategory(out.mkey);
       if (k) { out.cat = k; out.catSource = 'keyword'; }
@@ -269,7 +417,7 @@
     return out;
   }
 
-  const api = { CATEGORIES, KEYWORDS, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
+  const api = { CATEGORIES, KEYWORDS, MERCHANTS, merchantForWord, editDistance, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TallyParser = api;
 })(typeof window !== 'undefined' ? window : globalThis);

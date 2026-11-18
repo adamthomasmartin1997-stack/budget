@@ -757,8 +757,142 @@ button { cursor: pointer; }
   const FILLER = new Set(['at', 'on', 'for', 'from', 'the', 'a', '£', 'gbp', 'quid']);
   const WEEKDAYS = { sun: 0, sunday: 0, mon: 1, monday: 1, tue: 2, tues: 2, tuesday: 2, wed: 3, weds: 3, wednesday: 3,
     thu: 4, thur: 4, thurs: 4, thursday: 4, fri: 5, friday: 5, sat: 6, saturday: 6 };
+  const COMMON = new Set(['week', 'wait', 'with', 'from', 'that', 'this', 'there', 'their', 'water', 'stuff', 'things', 'present', 'parking',
+    'chips', 'chippy', 'cards', 'party', 'drink', 'drinks', 'snack', 'snacks', 'plants', 'paint', 'bills', 'tickets', 'books', 'clothes', 'shoes',
+    'house', 'hotel', 'train', 'trains', 'buses', 'coach', 'night', 'money', 'month', 'today', 'cash', 'nails', 'tyres', 'shops', 'shop', 'market',
+    'delivery', 'deliveries', 'bingo', 'tools', 'ticket', 'games', 'boot', 'chip', 'bolts', 'virginia', 'primary', 'nextdoor', 'service', 'charges', 'sports']);
   const SMALL = new Set(['and', 'of', 'the', 'in', 'for', 'to', 'at']);
   const UPPER = new Set(['isa', 'sipp', 'lisa', 'etf', 's&s', 'aj', 'hl', 'bp', 'tfl', 'ee', 'o2', 'bt', 'kfc', 'm&s', 'b&q', 'h&m', 'tv', 'mot', 'diy', 'ev', 'edf', 'ovo']);
+
+
+  // UK shops and brands: [proper name, category, ...other ways people write it]. Used to tidy names and spot typos.
+  const MERCHANTS = [
+    ['Tesco', 'groceries', 'tescos', 'tesco express', 'tesco extra', 'tesco metro'],
+    ["Sainsbury's", 'groceries', 'sains', 'sainsburys', 'sainsbury', 'sainos', 'sainsburies', 'sainsbos', 'sainsburys local'],
+    ['Asda', 'groceries', 'asdas'],
+    ['Morrisons', 'groceries', 'morrys', 'morries', 'morrison', 'morrissons'],
+    ['Aldi', 'groceries', 'aldis'],
+    ['Lidl', 'groceries', 'lidls'],
+    ['Waitrose', 'groceries', 'waitroses'],
+    ['M&S', 'groceries', 'marks and spencer', 'marks & spencer', 'marks and sparks', 'marks', 'm and s', 'ms food', 'm&s food'],
+    ['Co-op', 'groceries', 'coop', 'co op', 'the coop'],
+    ['Iceland', 'groceries'], ['Ocado', 'groceries'], ['Farmfoods', 'groceries'], ['Costco', 'groceries'], ['Booths', 'groceries'],
+    ["McDonald's", 'eating', 'maccies', 'maccys', 'mackies', 'mcdonalds', 'mcdonald', 'mcds', 'mcd', 'macdonalds', 'mickey ds'],
+    ['KFC', 'eating'], ['Burger King', 'eating', 'bk'], ["Nando's", 'eating', 'nandos'], ['Greggs', 'eating', 'gregs'],
+    ['Pret', 'eating', 'pret a manger'], ['Costa', 'eating', 'costa coffee'], ['Starbucks', 'eating', 'sbux', 'starbs', 'starbucks coffee'],
+    ['Caffè Nero', 'eating', 'nero', 'cafe nero', 'caffe nero'], ['Wetherspoons', 'eating', 'spoons', 'weatherspoons', 'wetherspoon', 'weatherspoon', 'jd wetherspoon'],
+    ['Wagamama', 'eating', 'wagas', 'wagamamas', 'wagamamma'], ['Pizza Express', 'eating', 'pizzaexpress'], ["Domino's", 'eating', 'dominos'],
+    ['Pizza Hut', 'eating'], ['Five Guys', 'eating', '5 guys'], ['Subway', 'eating'], ['Leon', 'eating'], ['Itsu', 'eating'], ['Wasabi', 'eating'],
+    ['Deliveroo', 'eating', 'deliveroos'], ['Uber Eats', 'eating', 'ubereats', 'uber eat'], ['Just Eat', 'eating', 'justeat'],
+    ['Toby Carvery', 'eating', 'toby', 'tobys'], ['Harvester', 'eating'], ['Zizzi', 'eating', 'zizzis'], ['Prezzo', 'eating'], ['Dishoom', 'eating'],
+    ['Tim Hortons', 'eating', 'timmies'], ['Taco Bell', 'eating'], ['Krispy Kreme', 'eating'],
+    ['Shell', 'transport'], ['BP', 'transport'], ['Esso', 'transport'], ['Texaco', 'transport'],
+    ['TfL', 'transport', 'oyster', 'tfl travel'], ['Trainline', 'transport', 'the trainline'], ['Uber', 'transport'], ['Bolt', 'transport'],
+    ['National Express', 'transport'], ['Megabus', 'transport'], ['LNER', 'transport'], ['GWR', 'transport'], ['Avanti', 'transport', 'avanti west coast'],
+    ['RingGo', 'transport', 'ringo', 'ring go'], ['PayByPhone', 'transport', 'pay by phone'], ['JustPark', 'transport', 'just park'],
+    ['Halfords', 'transport'], ['Kwik Fit', 'transport', 'kwikfit'],
+    ['British Gas', 'bills'], ['Octopus Energy', 'bills', 'octopus'], ['EDF', 'bills', 'edf energy'], ['E.ON', 'bills', 'eon', 'e.on next', 'eon next'],
+    ['OVO', 'bills', 'ovo energy'], ['Scottish Power', 'bills'], ['BT', 'bills', 'bt broadband'], ['Sky', 'bills'], ['Virgin Media', 'bills', 'virgin'],
+    ['EE', 'bills'], ['Vodafone', 'bills'], ['O2', 'bills'], ['giffgaff', 'bills', 'giff gaff'], ['Thames Water', 'bills'], ['Severn Trent', 'bills'],
+    ['TV Licence', 'bills', 'tv license', 'tv licensing'],
+    ['Netflix', 'subs'], ['Spotify', 'subs'], ['Disney+', 'subs', 'disney', 'disney plus', 'disneyplus'], ['Amazon Prime', 'subs', 'prime', 'prime video'],
+    ['iCloud', 'subs', 'apple icloud'], ['YouTube Premium', 'subs', 'youtube'], ['Audible', 'subs'], ['NOW', 'subs', 'now tv', 'nowtv'],
+    ['Xbox Game Pass', 'subs', 'game pass', 'gamepass'], ['PlayStation Plus', 'subs', 'ps plus', 'psplus'], ['ChatGPT', 'subs', 'chat gpt'],
+    ['Amazon', 'shopping', 'amzn', 'amazon uk', 'amazon.co.uk'], ['Argos', 'shopping'], ['Primark', 'shopping', 'primarni'], ['Next', 'shopping'],
+    ['Zara', 'shopping'], ['H&M', 'shopping', 'h and m'], ['ASOS', 'shopping'], ['TK Maxx', 'shopping', 'tkmaxx', 'tk max', 'tkmax'],
+    ['John Lewis', 'shopping', 'jlp', 'john lewis and partners'], ['Currys', 'shopping', 'currys pc world', 'pc world'], ['eBay', 'shopping'],
+    ['Vinted', 'shopping'], ['Etsy', 'shopping'], ['Uniqlo', 'shopping'], ['JD Sports', 'shopping', 'jd'], ['Sports Direct', 'shopping'],
+    ['Matalan', 'shopping'], ['B&M', 'shopping', 'b and m', 'bandm'], ['Home Bargains', 'shopping'], ['Poundland', 'shopping'],
+    ['Hobbycraft', 'shopping'], ['Shein', 'shopping'], ['Temu', 'shopping'],
+    ['IKEA', 'home'], ['B&Q', 'home', 'bnq', 'b and q', 'bandq'], ['Wickes', 'home'], ['Screwfix', 'home'], ['Toolstation', 'home'],
+    ['Dunelm', 'home'], ['Homebase', 'home'], ['The Range', 'home'],
+    ['Boots', 'health'], ['Superdrug', 'health'], ['Holland & Barrett', 'health', 'holland and barrett', 'h&b'], ['PureGym', 'health', 'pure gym'],
+    ['The Gym Group', 'health', 'gym group'], ['David Lloyd', 'health'], ['Specsavers', 'health'], ['Vision Express', 'health'],
+    ['Odeon', 'fun'], ['Vue', 'fun'], ['Cineworld', 'fun'], ['Ticketmaster', 'fun'], ['Steam', 'fun'], ['Waterstones', 'fun'],
+    ['WHSmith', 'shopping', 'whsmiths', 'wh smith', 'whs', 'smiths'],
+    ['easyJet', 'travel', 'easy jet'], ['Ryanair', 'travel', 'ryan air'], ['Jet2', 'travel', 'jet 2'], ['British Airways', 'travel', 'ba'],
+    ['Premier Inn', 'travel'], ['Travelodge', 'travel'], ['Airbnb', 'travel', 'air bnb'], ['Booking.com', 'travel', 'booking'], ['Eurostar', 'travel'],
+    ['Smyths', 'kids', 'smyths toys'], ['Pets at Home', 'pets', 'petsathome', 'pets at home'],
+    ['Card Factory', 'gifts', 'cardfactory'], ['Clintons', 'gifts', 'clinton cards'],
+    ['Vanguard', 'invest'], ['Trading 212', 'invest', 'trading212', 't212'], ['Freetrade', 'invest', 'free trade'],
+    ['Hargreaves Lansdown', 'invest', 'hl', 'hargreaves'], ['AJ Bell', 'invest', 'ajbell'], ['Moneybox', 'invest', 'money box'],
+    ['Nutmeg', 'invest'], ['Chip', 'savings'], ['Plum', 'savings'], ['Premium Bonds', 'savings', 'nsi', 'ns&i'],
+  ];
+  const nk = (s) => normKey(s).replace(/[.\-]/g, '').replace(/^the /, '');
+  const MERCH_PHRASE = [], MERCH_WORD = new Map(), MERCH_FUZZY = [];
+  MERCHANTS.forEach((m, i) => {
+    for (const a of [m[0]].concat(m.slice(2))) {
+      const k = nk(a);
+      if (!k) continue;
+      if (k.includes(' ')) MERCH_PHRASE.push([k.split(' '), i]); else if (!MERCH_WORD.has(k)) MERCH_WORD.set(k, i);
+      const flat = k.replace(/ /g, '');
+      if (flat.length >= 5) MERCH_FUZZY.push([flat, i]);
+    }
+  });
+  MERCH_PHRASE.sort((a, b) => b[0].length - a[0].length);
+  const MERCH_NAMES = new Set(MERCHANTS.map((m) => m[0]));
+
+  // Optimal string alignment distance (Levenshtein plus swapped neighbours), capped for speed.
+  function editDistance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    const d = [];
+    for (let i = 0; i <= a.length; i++) { d[i] = [i]; }
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      let rowMin = Infinity;
+      for (let j = 1; j <= b.length; j++) {
+        const c = a[i - 1] === b[j - 1] ? 0 : 1;
+        let v = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, d[i - 2][j - 2] + 1);
+        d[i][j] = v; if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return max + 1;
+    }
+    return d[a.length][b.length];
+  }
+
+  /** Finds a known merchant in one word: exact nickname, then a clear start of a name, then a near-miss spelling. */
+  function merchantForWord(w) {
+    const k = nk(w);
+    if (MERCH_WORD.has(k)) return MERCH_WORD.get(k);
+    if (COMMON.has(k)) return -1; // everyday words ("chips", "delivery") never become shops
+    const bare = k.replace(/'?s$/, '');
+    if (bare !== k && MERCH_WORD.has(bare)) return MERCH_WORD.get(bare);
+    if (WORD_MAP.has(k) || k.length < 4 || !/^[a-z&]+$/.test(k)) return -1;
+    // clear start of a name: at least 4 letters and nearly half the name, and only one shop fits
+    const pre = new Set();
+    for (const [name, i] of MERCH_FUZZY) if (name.startsWith(k) && k !== name && k.length >= Math.ceil(name.length * 0.5)) pre.add(i);
+    if (pre.size === 1) return [...pre][0];
+    if (k.length < 5) return -1;
+    // near-miss spelling: one slip for shorter words, two for long ones, and only if one shop is clearly closest
+    const max = k.length >= 9 ? 2 : 1;
+    let best = -1, bestD = max + 1, tie = false;
+    for (const [name, i] of MERCH_FUZZY) {
+      const dd = editDistance(k, name, max);
+      if (dd < bestD) { bestD = dd; best = i; tie = false; } else if (dd === bestD && i !== best) tie = true;
+    }
+    return bestD <= max && !tie ? best : -1;
+  }
+
+  /** Replaces any shop names in the words with their proper names. Returns {words, cat} (cat of the first shop found). */
+  function tidyMerchants(words) {
+    const out = [];
+    let cat = null;
+    const lw = words.map((w) => nk(w));
+    for (let i = 0; i < words.length;) {
+      let hit = null;
+      for (const [parts, mi] of MERCH_PHRASE) {
+        if (parts.length > 1 && parts.every((p, j) => lw[i + j] === p)) { hit = [parts.length, mi]; break; }
+      }
+      if (!hit) { const mi = merchantForWord(words[i]); if (mi >= 0) hit = [1, mi]; }
+      if (hit) {
+        out.push(MERCHANTS[hit[1]][0]);
+        if (!cat) cat = MERCHANTS[hit[1]][1];
+        i += hit[0];
+      } else { out.push(words[i]); i++; }
+    }
+    return { words: out, cat };
+  }
 
   function iso(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -918,13 +1052,27 @@ button { cursor: pointer; }
       if (FILLER.has(lows[i])) continue;
       words.push(tokens[i]);
     }
-    const descRaw = words.join(' ');
-    out.mkey = normKey(descRaw);
-    out.desc = titleCase(descRaw);
+    let descRaw = words.join(' ');
+    out.rawKey = normKey(descRaw); // what was typed, before tidying, so a correction can be learned
+    let merchantCat = null;
+    const aliases = ctx.aliases || {};
+    if (descRaw && aliases[normKey(descRaw)]) {
+      // a name this household corrected before, e.g. "js" -> "Sainsbury's"
+      descRaw = aliases[normKey(descRaw)];
+      out.desc = descRaw;
+      const t = tidyMerchants([descRaw]); merchantCat = t.cat || keywordCategory(normKey(descRaw));
+    } else {
+      const t = tidyMerchants(words);
+      merchantCat = t.cat;
+      out.desc = t.words.map((w, i) => (MERCH_NAMES.has(w) ? w : titleCase(w).replace(/^./, (c) => (i > 0 && SMALL.has(w.toLowerCase()) ? c.toLowerCase() : c)))).join(' ');
+    }
+    out.mkey = normKey(out.desc);
+    out.merchant = !!merchantCat;
 
     // 4. category
     if (explicitCat) { out.cat = explicitCat; out.catSource = 'explicit'; }
     else if (out.mkey && learned[out.mkey]) { out.cat = learned[out.mkey]; out.catSource = 'learned'; }
+    else if (merchantCat) { out.cat = merchantCat; out.catSource = 'keyword'; }
     else {
       const k = keywordCategory(out.mkey);
       if (k) { out.cat = k; out.catSource = 'keyword'; }
@@ -949,7 +1097,7 @@ button { cursor: pointer; }
     return out;
   }
 
-  const api = { CATEGORIES, KEYWORDS, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
+  const api = { CATEGORIES, KEYWORDS, MERCHANTS, merchantForWord, editDistance, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TallyParser = api;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -999,7 +1147,7 @@ const monthName = (ym, withYear) => fromISO(ym + '-01').toLocaleDateString('en-G
 // ---------- State ----------
 function defaultState() {
   return {
-    v: 1, people: ['Me'], setup: false, defaultWho: 'shared', txns: [], learned: {}, fixed: [], recap: {}, goals: [],
+    v: 1, people: ['Me'], setup: false, defaultWho: 'shared', txns: [], learned: {}, aliases: {}, fixed: [], recap: {}, goals: [],
     theme: { style: 'pop', mode: 'system', chosen: true },
     budgets: { groceries: 45000, eating: 15000, transport: 15000, bills: 120000, shopping: 10000, fun: 6000, subs: 4000, home: 5000 },
   };
@@ -1039,7 +1187,7 @@ function load() {
   try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) { s = null; }
   if (!s || s.v !== 1 || !Array.isArray(s.txns)) { s = defaultState(); seedExamples(s); }
   const d = defaultState();
-  for (const k of ['fixed', 'recap', 'theme', 'goals']) if (!s[k]) s[k] = d[k];
+  for (const k of ['fixed', 'recap', 'theme', 'goals', 'aliases']) if (!s[k]) s[k] = d[k];
   if (!s.theme.chosen) s.theme = d.theme; // Pop became the house style; earlier saves had no explicit choice
   return s;
 }
@@ -1051,7 +1199,7 @@ let S = load();
 const isPair = () => S.people.length === 2;
 const whoLabel = (w) => (w === 'shared' ? 'Joint' : w || '');
 const whoClass = (w) => (w === 'shared' ? 'shared' : w === S.people[0] ? 'p1' : w === S.people[1] ? 'p2' : 'all');
-const ctx = () => ({ people: S.people, learned: S.learned, defaultWho: isPair() ? S.defaultWho : null });
+const ctx = () => ({ people: S.people, learned: S.learned, aliases: S.aliases, defaultWho: isPair() ? S.defaultWho : null });
 
 // ---- 10-ui-state.js ----
 // ---------- UI state ----------
@@ -1173,6 +1321,8 @@ function submitQuick() {
     const auto = TP.keywordCategory(mkey) || 'other';
     if (qa.ov.cat === auto) delete S.learned[mkey]; else S.learned[mkey] = qa.ov.cat;
   }
+  // Learning names: if the name was corrected in the preview, that spelling means the corrected name from now on.
+  if (qa.ov.desc !== undefined) learnAlias(p.rawKey, desc);
   if (p.recur && p.type !== 'in') {
     const f = { id: uid(), desc, amt: p.amt, day: +p.date.slice(8), cat: p.cat, who: isPair() ? p.who || S.defaultWho : null, start: monthOf(p.date), posted: [monthOf(p.date)], active: true };
     S.fixed.push(f);
@@ -1180,7 +1330,7 @@ function submitQuick() {
     toast(`${desc} ${money(p.amt)} logged · repeats on the ${ordinal(f.day)} monthly`, () => {
       S.txns = S.txns.filter((x) => x.id !== tx.id); S.fixed = S.fixed.filter((x) => x.id !== f.id); save(); refresh();
     });
-  } else addTxn({ amt: p.amt, type: p.type, desc, mkey, cat: p.cat, date: p.date, who: p.who }, { learnedBefore });
+  } else addTxn({ amt: p.amt, type: p.type, desc, mkey, rawKey: p.rawKey || undefined, cat: p.cat, date: p.date, who: p.who }, { learnedBefore });
   qa.input.value = '';
   qa.ov = {};
   renderChip();
@@ -1286,6 +1436,14 @@ function whoChooser(sel) {
   const opts = ['shared'].concat(S.people);
   return `<div class="datelist">${opts.map((w) => `<button type="button" data-act="who" data-v="${esc(w)}" aria-pressed="${w === sel}">${esc(whoLabel(w))}</button>`).join('')}</div>
     <p class="hint" style="margin-top:12px">The dropdown next to the box sets this for every new entry. Typing a name, “joint” or “split” changes it for one entry.</p>`;
+}
+
+/** Remember that a typed name means another, e.g. "js" -> "Sainsbury's". Ordinary words like "coffee" are never redirected. */
+function learnAlias(raw, name) {
+  raw = String(raw || '');
+  if (!raw || !name || raw === TP.normKey(name) || raw.length > 24 || TP.keywordCategory(raw)) return false;
+  S.aliases[raw] = name;
+  return true;
 }
 
 // ---- 20-sheets.js ----
@@ -1414,6 +1572,7 @@ function editTxn(id) {
       const before = Object.assign({}, t);
       draft.mkey = TP.normKey(draft.desc);
       let learnedNote = '';
+      if (draft.desc !== t.desc && learnAlias(t.rawKey || TP.normKey(t.desc), draft.desc)) learnedNote = ` · “${t.rawKey || TP.normKey(t.desc)}” means ${draft.desc} from now on`;
       if (draft.cat !== t.cat && draft.mkey && draft.type !== 'in') {
         const auto = TP.keywordCategory(draft.mkey) || 'other';
         if (draft.cat === auto) delete S.learned[draft.mkey]; else S.learned[draft.mkey] = draft.cat;
@@ -2200,6 +2359,7 @@ const swatches = () => STYLES.map((p) => `<button type="button" class="stylepick
 function renderPrefs() {
   const el = $('#view-prefs');
   const learned = Object.entries(S.learned);
+  const aliases = Object.entries(S.aliases || {});
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
   const pairCheat = isPair() ? `<dt>petrol 55 ${esc(S.people[0].toLowerCase())}</dt><dd>Tag to ${esc(S.people[0])}</dd><dt>dinner 60 split</dt><dd>Shared cost</dd>` : '';
   el.innerHTML = `<div class="stack">
@@ -2223,13 +2383,15 @@ function renderPrefs() {
       <dt>tesco 23.40</dt><dd>£23.40 at Tesco, Groceries</dd><dt>23.40 tesco</dt><dd>Same, any order</dd>
       <dt>+2400 salary</dt><dd>Income (or “salary 2400 in”)</dd>${pairCheat}
       <dt>coffee 3.2 yday</dt><dd>Dated yesterday. Also “fri”, “last mon”, “14/11”</dd>
-      <dt>50p</dt><dd>Pence work too, as does “2.4k”</dd><dt>gift 20 #fun</dt><dd>Force a category with #</dd><dt>netflix 10.99 monthly</dt><dd>Make it a fixed cost that repeats</dd>
+      <dt>50p</dt><dd>Pence work too, as does “2.4k”</dd><dt>gift 20 #fun</dt><dd>Force a category with #</dd><dt>netflix 10.99 monthly</dt><dd>Make it a fixed cost that repeats</dd><dt>sains 41.12</dt><dd>Sainsbury's. Nicknames and typos for UK shops work too: maccies, spoons, tescp</dd>
     </dl></div></section>
 
-    <section><div class="sec-h"><h2>Learned merchants</h2></div><div class="card">
+    <section><div class="sec-h"><h2>What it has learned</h2></div><div class="card">
       ${learned.length ? `<div class="setlist">${learned.map(([k, c]) => `<div><span><b>${esc(TP.titleCase(k))}</b> → ${esc((CAT[c] || CAT.other).name)}</span>
         <button type="button" class="link" data-unlearn="${esc(k)}">Forget</button></div>`).join('')}</div>`
         : `<p class="hint">When you change a merchant's category, it's remembered here and used next time.</p>`}
+      ${aliases.length ? `<div class="setlist" style="margin-top:10px">${aliases.map(([k, v]) => `<div><span>“${esc(k)}” means <b>${esc(v)}</b></span>
+        <button type="button" class="link" data-unalias="${esc(k)}">Forget</button></div>`).join('')}</div>` : ''}
     </div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
@@ -2353,6 +2515,7 @@ document.addEventListener('click', (e) => {
   }
   if (t.closest('[data-keep-examples]')) { S.exKeep = true; save(); renderHome(); return; }
   if ((b = t.closest('[data-default-who]'))) { S.defaultWho = b.dataset.defaultWho; save(); refresh(); return; }
+  if ((b = t.closest('[data-unalias]'))) { const k = b.dataset.unalias, v = S.aliases[k]; delete S.aliases[k]; save(); refresh(); return toast(`Forgot “${k}”`, () => { S.aliases[k] = v; save(); refresh(); }); }
   if ((b = t.closest('[data-unlearn]'))) { const k = b.dataset.unlearn, v = S.learned[k]; delete S.learned[k]; save(); refresh(); return toast(`Forgot ${TP.titleCase(k)}`, () => { S.learned[k] = v; save(); refresh(); }); }
   if (t.closest('[data-export]')) {
     try {
@@ -2418,6 +2581,7 @@ function syncRecords() {
   for (const g of S.goals) if (!g.example) r['g:' + g.id] = cleanRec(g);
   for (const [k, cat] of Object.entries(S.learned)) r['l:' + k] = { cat };
   for (const [k, amt] of Object.entries(S.budgets)) r['b:' + k] = { amt };
+  for (const [k, name] of Object.entries(S.aliases || {})) r['a:' + k] = { name };
   r['m:people'] = { people: S.people };
   return r;
 }
@@ -2434,6 +2598,7 @@ function applyIncoming(changes) {
     else if (kind === 'f') upsert(S.fixed, id, c);
     else if (kind === 'g') upsert(S.goals, id, c);
     else if (kind === 'l') { if (c.x) delete S.learned[id]; else S.learned[id] = c.d.cat; }
+    else if (kind === 'a') { if (c.x) delete S.aliases[id]; else S.aliases[id] = c.d.name; }
     else if (kind === 'b') { if (c.x) delete S.budgets[id]; else S.budgets[id] = c.d.amt; }
     else if (c.k === 'm:people' && !c.x && Array.isArray(c.d.people) && c.d.people.length) {
       S.people = c.d.people.slice(0, 2);

@@ -62,10 +62,10 @@ check(rentsA === 1 && rentsB === 1, 'a fixed cost posted on both phones is not d
 
 // Names, budgets and learning travel too
 await A.p.goto(base + '/#budget'); await A.p.waitForTimeout(200);
-await A.p.evaluate(() => { const s = JSON.parse(localStorage.getItem('tally.v1')); s.budgets.groceries = 52000; s.learned['tesco'] = 'shopping'; localStorage.setItem('tally.v1', JSON.stringify(s)); });
+await A.p.evaluate(() => { const s = JSON.parse(localStorage.getItem('tally.v1')); s.budgets.groceries = 52000; s.learned['tesco'] = 'shopping'; s.aliases = Object.assign(s.aliases || {}, { js: "Sainsbury's" }); localStorage.setItem('tally.v1', JSON.stringify(s)); });
 await A.p.reload(); await A.p.waitForTimeout(300); await sync(A.p); await sync(B.p);
 const bs = await B.p.evaluate(() => JSON.parse(localStorage.getItem('tally.v1')));
-check(bs.budgets.groceries === 52000 && bs.learned.tesco === 'shopping', 'budgets and learned categories sync');
+check(bs.budgets.groceries === 52000 && bs.learned.tesco === 'shopping' && bs.aliases.js === "Sainsbury's", 'budgets, learned categories and learned names sync');
 
 // Offline: B logs while the server is unreachable, then catches up
 await B.c.route('**/api/sync', (r) => r.abort());

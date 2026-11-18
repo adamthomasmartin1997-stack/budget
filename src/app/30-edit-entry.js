@@ -45,6 +45,7 @@ function editTxn(id) {
       const before = Object.assign({}, t);
       draft.mkey = TP.normKey(draft.desc);
       let learnedNote = '';
+      if (draft.desc !== t.desc && learnAlias(t.rawKey || TP.normKey(t.desc), draft.desc)) learnedNote = ` · “${t.rawKey || TP.normKey(t.desc)}” means ${draft.desc} from now on`;
       if (draft.cat !== t.cat && draft.mkey && draft.type !== 'in') {
         const auto = TP.keywordCategory(draft.mkey) || 'other';
         if (draft.cat === auto) delete S.learned[draft.mkey]; else S.learned[draft.mkey] = draft.cat;
