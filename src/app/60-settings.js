@@ -98,8 +98,8 @@ function savePeople(n1, n2) {
 function exportJSON() { return JSON.stringify(Object.assign({ app: 'tally', exported: new Date().toISOString() }, S), null, 1); }
 function importJSON(text) {
   let d;
-  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Budget Tracker backup'); return; }
-  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Budget Tracker backup'); return; }
+  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Budget backup'); return; }
+  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Budget backup'); return; }
   const have = new Set(S.txns.map((t) => t.id));
   let n = 0;
   for (const t of d.txns) {

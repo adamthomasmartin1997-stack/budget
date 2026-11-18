@@ -1,4 +1,4 @@
-/* Budget Tracker service worker: offline app shell, cache-first with background refresh. */
+/* Budget service worker: offline app shell, cache-first with background refresh. */
 const VERSION = '__VERSION__';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', (e) => {

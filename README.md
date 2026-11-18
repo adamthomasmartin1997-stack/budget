@@ -1,4 +1,4 @@
-# Budget Tracker
+# Budget
 
 A household budget tracker for one or two people. Logging a cost is one line: `tesco 23.40`. Both phones share one household, so everything either of you logs shows on both. GBP, UK dates. It's a web app you add to your home screen; no app store needed.
 

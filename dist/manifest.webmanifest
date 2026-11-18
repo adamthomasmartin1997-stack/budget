@@ -1,5 +1,5 @@
 {
-  "name": "Budget Tracker",
+  "name": "Budget",
   "short_name": "Budget",
   "description": "Log household spending in seconds.",
   "start_url": "./?source=pwa",

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Budget Tracker</title>
+<title>Budget</title>
 <meta name="description" content="Log household spending in seconds.">
 <meta name="theme-color" content="#e6edff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14151b" media="(prefers-color-scheme: dark)">
@@ -609,7 +609,7 @@ button { cursor: pointer; }
 <body>
 <div class="app" id="app">
   <header class="top">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Budget Tracker</span></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Budget</span></div>
     <div class="top-r"><i class="sdot" id="syncMeta" hidden></i><span class="top-meta" id="topMeta"></span>
       <a class="icon-btn gear hdr-activity" href="#activity" aria-label="All entries"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg></a>
       <a class="icon-btn gear hdr-prefs" href="#prefs" aria-label="Settings"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a></div>
@@ -658,11 +658,11 @@ button { cursor: pointer; }
 
 <div class="onboard" id="onboard" hidden>
   <form class="onboard-in" id="onboardForm" autocomplete="off">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Budget Tracker</span></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Budget</span></div>
     <h1>Log a cost in one line.</h1>
     <p class="lede">Type what and how much, in any order, and it sorts the rest.</p>
     <dl class="cheat ob-cheat"><dt>tesco 23.40</dt><dd>£23.40, Groceries, today</dd><dt>coffee 3.2 yday</dt><dd>£3.20, Eating out, yesterday</dd><dt>netflix 10.99 monthly</dt><dd>A fixed cost that logs itself each month</dd><dt>+2400 salary</dt><dd>Money in</dd></dl>
-    <fieldset class="ob-set"><legend>Who's using Budget Tracker?</legend>
+    <fieldset class="ob-set"><legend>Who's budgeting?</legend>
       <div class="row2"><input class="input" id="obName1" placeholder="Your name" autocomplete="given-name" aria-label="Your name" required>
       <input class="input" id="obName2" placeholder="Partner (optional)" aria-label="Partner's name (optional)"></div>
       <p class="hint">With a partner, every cost can be yours, theirs or joint, and Insights shows each of you separately. You can change names later in Settings.</p></fieldset>
@@ -2291,8 +2291,8 @@ function savePeople(n1, n2) {
 function exportJSON() { return JSON.stringify(Object.assign({ app: 'tally', exported: new Date().toISOString() }, S), null, 1); }
 function importJSON(text) {
   let d;
-  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Budget Tracker backup'); return; }
-  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Budget Tracker backup'); return; }
+  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Budget backup'); return; }
+  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Budget backup'); return; }
   const have = new Set(S.txns.map((t) => t.id));
   let n = 0;
   for (const t of d.txns) {
@@ -2542,7 +2542,7 @@ function syncAgo() {
   return s < 45 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`;
 }
 function syncSection() {
-  if (!SYNC_ON) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card"><p class="hint">Sync works on your own Budget Tracker website on Netlify. This preview keeps entries on this device only.</p></div></section>`;
+  if (!SYNC_ON) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card"><p class="hint">Sync works on your own website on Netlify. This preview keeps entries on this device only.</p></div></section>`;
   if (!SY.code) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card form">
     <p class="hint">Share one household between two phones. Everything either of you logs shows up on both.</p>
     <button type="button" class="btn primary" data-sync-start>Start a household</button>

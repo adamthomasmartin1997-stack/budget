@@ -16,7 +16,7 @@ const pwa = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Budget Tracker</title>
+<title>Budget</title>
 <meta name="description" content="Log household spending in seconds.">
 <meta name="theme-color" content="#e6edff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14151b" media="(prefers-color-scheme: dark)">
@@ -42,7 +42,7 @@ ${scripts(true)}
 </html>
 `;
 const manifest = {
-  name: 'Budget Tracker', short_name: 'Budget', description: 'Log household spending in seconds.',
+  name: 'Budget', short_name: 'Budget', description: 'Log household spending in seconds.',
   start_url: './?source=pwa', scope: './', display: 'standalone', orientation: 'portrait',
   background_color: '#e6edff', theme_color: '#ff5a36', lang: 'en-GB',
   icons: [
@@ -60,7 +60,7 @@ fs.writeFileSync(path.join(__dirname, 'dist/sw.js'), r('sw.js').replace('__VERSI
 fs.copyFileSync(path.join(__dirname, 'src/icon.svg'), path.join(__dirname, 'dist/icons/icon.svg'));
 
 // Artifact preview: the host wraps the page in its own document skeleton, and service workers are unavailable there.
-const preview = `<title>Budget Tracker</title>
+const preview = `<title>Budget</title>
 <script>try{var t=JSON.parse(localStorage.getItem('tally.v1')||'null');document.documentElement.setAttribute('data-style',(t&&t.theme&&t.theme.chosen&&t.theme.style)||'pop')}catch(e){document.documentElement.setAttribute('data-style','pop')}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 ${fonts}
