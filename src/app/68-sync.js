@@ -125,7 +125,7 @@ function syncAgo() {
   return s < 45 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`;
 }
 function syncSection() {
-  if (!SYNC_ON) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card"><p class="hint">Sync works on your own Tally website on Netlify. This preview keeps entries on this device only.</p></div></section>`;
+  if (!SYNC_ON) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card"><p class="hint">Sync works on your own Budget Tracker website on Netlify. This preview keeps entries on this device only.</p></div></section>`;
   if (!SY.code) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card form">
     <p class="hint">Share one household between two phones. Everything either of you logs shows up on both.</p>
     <button type="button" class="btn primary" data-sync-start>Start a household</button>

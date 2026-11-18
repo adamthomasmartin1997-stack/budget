@@ -46,7 +46,7 @@ function renderIncome() {
       ${left < 0 ? '<p class="hint">More went out than came in this month so far.</p>' : ''}</div></section>` : ''}
 
     <section><div class="sec-h"><h2>Regular income</h2><span class="hint">Logs itself on payday</span></div>
-      ${regular.length ? `<ul class="list">${regular.map(row).join('')}</ul>` : `<p class="empty">Add your salary once and Tally logs it on payday every month.</p>`}
+      ${regular.length ? `<ul class="list">${regular.map(row).join('')}</ul>` : `<p class="empty">Add your salary once and it logs itself on payday every month.</p>`}
       <button type="button" class="btn primary" style="margin-top:12px;width:100%" data-add-income>Add regular income</button></section>
 
     <section><div class="sec-h"><h2>Received in ${esc(monthName(ym))}</h2></div>

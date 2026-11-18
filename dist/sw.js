@@ -1,5 +1,5 @@
-/* Tally service worker: offline app shell, cache-first with background refresh. */
-const VERSION = 'tally-mwlpj93u';
+/* Budget Tracker service worker: offline app shell, cache-first with background refresh. */
+const VERSION = 'tally-mwlpwk85';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

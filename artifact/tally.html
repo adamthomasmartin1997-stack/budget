@@ -1,4 +1,4 @@
-<title>Tally</title>
+<title>Budget Tracker</title>
 <script>try{var t=JSON.parse(localStorage.getItem('tally.v1')||'null');document.documentElement.setAttribute('data-style',(t&&t.theme&&t.theme.chosen&&t.theme.style)||'pop')}catch(e){document.documentElement.setAttribute('data-style','pop')}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -583,11 +583,15 @@ button { cursor: pointer; }
   background: var(--surface-2); user-select: all; word-break: break-all; }
 .ob-join { display: grid; gap: 8px; padding: 14px; border-radius: var(--r); border: var(--ctl-border); background: var(--surface); }
 .link.armed { color: var(--over); }
+.brand { white-space: nowrap; min-width: 0; }
+.top-meta { white-space: nowrap; }
+@media (max-width: 380px) { .top-meta { display: none; } .brand { font-size: 18px; } }
+.brand-mark { flex: none; }
 
 </style>
 <div class="app" id="app">
   <header class="top">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Tally</span></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Budget Tracker</span></div>
     <div class="top-r"><i class="sdot" id="syncMeta" hidden></i><span class="top-meta" id="topMeta"></span>
       <a class="icon-btn gear hdr-activity" href="#activity" aria-label="All entries"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg></a>
       <a class="icon-btn gear hdr-prefs" href="#prefs" aria-label="Settings"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></a></div>
@@ -636,11 +640,11 @@ button { cursor: pointer; }
 
 <div class="onboard" id="onboard" hidden>
   <form class="onboard-in" id="onboardForm" autocomplete="off">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Tally</span></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">£</span><span>Budget Tracker</span></div>
     <h1>Log a cost in one line.</h1>
-    <p class="lede">Type what and how much, in any order, and Tally sorts the rest.</p>
+    <p class="lede">Type what and how much, in any order, and it sorts the rest.</p>
     <dl class="cheat ob-cheat"><dt>tesco 23.40</dt><dd>£23.40, Groceries, today</dd><dt>coffee 3.2 yday</dt><dd>£3.20, Eating out, yesterday</dd><dt>netflix 10.99 monthly</dt><dd>A fixed cost that logs itself each month</dd><dt>+2400 salary</dt><dd>Money in</dd></dl>
-    <fieldset class="ob-set"><legend>Who's using Tally?</legend>
+    <fieldset class="ob-set"><legend>Who's using Budget Tracker?</legend>
       <div class="row2"><input class="input" id="obName1" placeholder="Your name" autocomplete="given-name" aria-label="Your name" required>
       <input class="input" id="obName2" placeholder="Partner (optional)" aria-label="Partner's name (optional)"></div>
       <p class="hint">With a partner, every cost can be yours, theirs or joint, and Insights shows each of you separately. You can change names later in Settings.</p></fieldset>
@@ -1253,7 +1257,7 @@ function editField(field) {
     }, '#fDesc');
   } else if (field === 'cat') {
     openSheet(p.desc ? `Category for ${p.desc}` : 'Category', catGrid(p.type === 'in' ? CATS : OUT_CATS, p.cat) +
-      (p.desc ? `<p class="hint" style="margin-top:12px">Tally will remember this for ${esc(p.desc)} next time.</p>` : ''), (act, el) => {
+      (p.desc ? `<p class="hint" style="margin-top:12px">This will be remembered for ${esc(p.desc)} next time.</p>` : ''), (act, el) => {
       if (act === 'cat') { qa.ov.cat = el.dataset.v; backToInput(); }
     });
   } else if (field === 'date') {
@@ -2015,7 +2019,7 @@ function renderFixed() {
     </div>
     <button type="button" class="btn primary" data-add-fixed>Add a fixed cost</button>
     ${sorted.length ? `<section><div class="sec-h"><h2>Every month</h2><span class="hint">They log themselves on the day</span></div><ul class="list">${sorted.map(row).join('')}</ul></section>`
-      : `<p class="empty">Add rent, bills and subscriptions once. Tally logs each one on its day every month. You can also type <b>netflix 10.99 monthly</b> in the quick-add box.</p>`}
+      : `<p class="empty">Add rent, bills and subscriptions once. Each one logs itself on its day every month. You can also type <b>netflix 10.99 monthly</b> in the quick-add box.</p>`}
     ${sugg.length ? `<section><div class="sec-h"><h2>These look regular</h2></div><div class="card">${sugg.map((x) => `<div class="suggest"><span><b>${esc(x.desc)}</b> ${money(x.amt)} <span class="muted">around the ${ordinal(+x.date.slice(8))}</span></span>
       <button type="button" class="link" data-suggest="${x.id}">Make fixed</button></div>`).join('')}</div></section>` : ''}
   </div>`;
@@ -2118,7 +2122,7 @@ function renderIncome() {
       ${left < 0 ? '<p class="hint">More went out than came in this month so far.</p>' : ''}</div></section>` : ''}
 
     <section><div class="sec-h"><h2>Regular income</h2><span class="hint">Logs itself on payday</span></div>
-      ${regular.length ? `<ul class="list">${regular.map(row).join('')}</ul>` : `<p class="empty">Add your salary once and Tally logs it on payday every month.</p>`}
+      ${regular.length ? `<ul class="list">${regular.map(row).join('')}</ul>` : `<p class="empty">Add your salary once and it logs itself on payday every month.</p>`}
       <button type="button" class="btn primary" style="margin-top:12px;width:100%" data-add-income>Add regular income</button></section>
 
     <section><div class="sec-h"><h2>Received in ${esc(monthName(ym))}</h2></div>
@@ -2225,7 +2229,7 @@ function renderPrefs() {
     <section><div class="sec-h"><h2>Learned merchants</h2></div><div class="card">
       ${learned.length ? `<div class="setlist">${learned.map(([k, c]) => `<div><span><b>${esc(TP.titleCase(k))}</b> → ${esc((CAT[c] || CAT.other).name)}</span>
         <button type="button" class="link" data-unlearn="${esc(k)}">Forget</button></div>`).join('')}</div>`
-        : `<p class="hint">When you change a merchant's category, Tally remembers it here and uses it next time.</p>`}
+        : `<p class="hint">When you change a merchant's category, it's remembered here and used next time.</p>`}
     </div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
@@ -2235,7 +2239,7 @@ function renderPrefs() {
     </div></section>
 
     ${deferredInstall || ios ? `<section><div class="sec-h"><h2>Install</h2></div><div class="card form">
-      ${deferredInstall ? `<button type="button" class="btn primary" data-install>Add Tally to home screen</button>` : `<p class="hint">In Safari, tap Share, then “Add to Home Screen”.</p>`}</div></section>` : ''}
+      ${deferredInstall ? `<button type="button" class="btn primary" data-install>Add to home screen</button>` : `<p class="hint">In Safari, tap Share, then “Add to Home Screen”.</p>`}</div></section>` : ''}
 
     <section><div class="sec-h"><h2>Data</h2></div><div class="card btns">
       ${S.txns.some((t) => t.example) ? `<button type="button" class="btn" data-clear-examples>Clear examples</button>` : ''}
@@ -2269,8 +2273,8 @@ function savePeople(n1, n2) {
 function exportJSON() { return JSON.stringify(Object.assign({ app: 'tally', exported: new Date().toISOString() }, S), null, 1); }
 function importJSON(text) {
   let d;
-  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Tally backup'); return; }
-  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Tally backup'); return; }
+  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Budget Tracker backup'); return; }
+  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Budget Tracker backup'); return; }
   const have = new Set(S.txns.map((t) => t.id));
   let n = 0;
   for (const t of d.txns) {
@@ -2520,7 +2524,7 @@ function syncAgo() {
   return s < 45 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`;
 }
 function syncSection() {
-  if (!SYNC_ON) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card"><p class="hint">Sync works on your own Tally website on Netlify. This preview keeps entries on this device only.</p></div></section>`;
+  if (!SYNC_ON) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card"><p class="hint">Sync works on your own Budget Tracker website on Netlify. This preview keeps entries on this device only.</p></div></section>`;
   if (!SY.code) return `<section><div class="sec-h"><h2>Sync between phones</h2></div><div class="card form">
     <p class="hint">Share one household between two phones. Everything either of you logs shows up on both.</p>
     <button type="button" class="btn primary" data-sync-start>Start a household</button>
@@ -2606,7 +2610,7 @@ if (SYNC_ON && SY.code) syncNow();
 renderQuick();
 renderChip();
 route();
-if (posted && S.setup) toast(`Logged ${posted} fixed cost${posted === 1 ? '' : 's'} due since you last opened Tally`);
+if (posted && S.setup) toast(`Logged ${posted} fixed cost${posted === 1 ? '' : 's'} due since you last opened the app`);
 if (window.matchMedia && window.matchMedia('(pointer: fine)').matches && ui.tab === 'home') { try { qa.input.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
 
 if (window.TALLY_PWA && 'serviceWorker' in navigator) {

@@ -69,7 +69,7 @@ function renderFixed() {
     </div>
     <button type="button" class="btn primary" data-add-fixed>Add a fixed cost</button>
     ${sorted.length ? `<section><div class="sec-h"><h2>Every month</h2><span class="hint">They log themselves on the day</span></div><ul class="list">${sorted.map(row).join('')}</ul></section>`
-      : `<p class="empty">Add rent, bills and subscriptions once. Tally logs each one on its day every month. You can also type <b>netflix 10.99 monthly</b> in the quick-add box.</p>`}
+      : `<p class="empty">Add rent, bills and subscriptions once. Each one logs itself on its day every month. You can also type <b>netflix 10.99 monthly</b> in the quick-add box.</p>`}
     ${sugg.length ? `<section><div class="sec-h"><h2>These look regular</h2></div><div class="card">${sugg.map((x) => `<div class="suggest"><span><b>${esc(x.desc)}</b> ${money(x.amt)} <span class="muted">around the ${ordinal(+x.date.slice(8))}</span></span>
       <button type="button" class="link" data-suggest="${x.id}">Make fixed</button></div>`).join('')}</div></section>` : ''}
   </div>`;

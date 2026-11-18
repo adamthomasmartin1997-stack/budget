@@ -53,7 +53,7 @@ if (SYNC_ON && SY.code) syncNow();
 renderQuick();
 renderChip();
 route();
-if (posted && S.setup) toast(`Logged ${posted} fixed cost${posted === 1 ? '' : 's'} due since you last opened Tally`);
+if (posted && S.setup) toast(`Logged ${posted} fixed cost${posted === 1 ? '' : 's'} due since you last opened the app`);
 if (window.matchMedia && window.matchMedia('(pointer: fine)').matches && ui.tab === 'home') { try { qa.input.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
 
 if (window.TALLY_PWA && 'serviceWorker' in navigator) {

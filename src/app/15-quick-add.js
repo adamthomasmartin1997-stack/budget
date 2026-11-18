@@ -196,7 +196,7 @@ function editField(field) {
     }, '#fDesc');
   } else if (field === 'cat') {
     openSheet(p.desc ? `Category for ${p.desc}` : 'Category', catGrid(p.type === 'in' ? CATS : OUT_CATS, p.cat) +
-      (p.desc ? `<p class="hint" style="margin-top:12px">Tally will remember this for ${esc(p.desc)} next time.</p>` : ''), (act, el) => {
+      (p.desc ? `<p class="hint" style="margin-top:12px">This will be remembered for ${esc(p.desc)} next time.</p>` : ''), (act, el) => {
       if (act === 'cat') { qa.ov.cat = el.dataset.v; backToInput(); }
     });
   } else if (field === 'date') {

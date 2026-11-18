@@ -54,7 +54,7 @@ function renderPrefs() {
     <section><div class="sec-h"><h2>Learned merchants</h2></div><div class="card">
       ${learned.length ? `<div class="setlist">${learned.map(([k, c]) => `<div><span><b>${esc(TP.titleCase(k))}</b> → ${esc((CAT[c] || CAT.other).name)}</span>
         <button type="button" class="link" data-unlearn="${esc(k)}">Forget</button></div>`).join('')}</div>`
-        : `<p class="hint">When you change a merchant's category, Tally remembers it here and uses it next time.</p>`}
+        : `<p class="hint">When you change a merchant's category, it's remembered here and used next time.</p>`}
     </div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
@@ -64,7 +64,7 @@ function renderPrefs() {
     </div></section>
 
     ${deferredInstall || ios ? `<section><div class="sec-h"><h2>Install</h2></div><div class="card form">
-      ${deferredInstall ? `<button type="button" class="btn primary" data-install>Add Tally to home screen</button>` : `<p class="hint">In Safari, tap Share, then “Add to Home Screen”.</p>`}</div></section>` : ''}
+      ${deferredInstall ? `<button type="button" class="btn primary" data-install>Add to home screen</button>` : `<p class="hint">In Safari, tap Share, then “Add to Home Screen”.</p>`}</div></section>` : ''}
 
     <section><div class="sec-h"><h2>Data</h2></div><div class="card btns">
       ${S.txns.some((t) => t.example) ? `<button type="button" class="btn" data-clear-examples>Clear examples</button>` : ''}
@@ -98,8 +98,8 @@ function savePeople(n1, n2) {
 function exportJSON() { return JSON.stringify(Object.assign({ app: 'tally', exported: new Date().toISOString() }, S), null, 1); }
 function importJSON(text) {
   let d;
-  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Tally backup'); return; }
-  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Tally backup'); return; }
+  try { d = JSON.parse(text); } catch (e) { toast('That file is not a Budget Tracker backup'); return; }
+  if (!d || !Array.isArray(d.txns)) { toast('That file is not a Budget Tracker backup'); return; }
   const have = new Set(S.txns.map((t) => t.id));
   let n = 0;
   for (const t of d.txns) {
