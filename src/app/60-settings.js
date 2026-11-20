@@ -60,6 +60,10 @@ function renderPrefs() {
         <button type="button" class="link" data-unalias="${esc(k)}">Forget</button></div>`).join('')}</div>` : ''}
     </div></section>
 
+    <section><div class="sec-h"><h2>Bank statements</h2></div><div class="card form">
+      <p class="hint">Download a CSV statement from your bank's app or website, then import it here. You'll see every transaction before anything is added, and ones you've already logged are left out.</p>
+      <button type="button" class="btn primary" data-import>Import a bank statement</button></div></section>
+
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
       <p class="hint">Entries are stored on this device only. Export a backup now and then. To combine two phones, export on one and import on the other; matching entries are merged, not duplicated.</p>
       <div class="btns">${window.TALLY_PWA ? `<button type="button" class="btn" data-export>Export backup</button>` : ""}<button type="button" class="btn" data-copy>Copy backup</button>

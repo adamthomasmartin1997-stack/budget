@@ -588,6 +588,26 @@ button { cursor: pointer; }
 @media (max-width: 380px) { .top-meta { display: none; } .brand { font-size: 18px; } }
 .brand-mark { flex: none; }
 
+/* statement import */
+.import-btn { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.imp { gap: 12px; }
+.imp-sum { margin: 0; font-size: 14px; }
+.imp-swap { justify-self: start; font-size: 12px; color: var(--ink-2) !important; font-weight: 500 !important; text-decoration: underline; }
+.imp-note { padding: 10px 12px; }
+.imp-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 14px; }
+.imp-list input[type=checkbox] { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); }
+.imp-main { display: grid; gap: 3px; min-width: 0; }
+.imp-main b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.imp-main small { color: var(--ink-2); font-size: 12px; }
+.imp-raw { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .8; }
+.imp-flag { color: var(--warn); font-weight: 600; }
+.imp-cat { justify-self: start; max-width: 100%; height: 32px; border-radius: var(--r-xs); border: var(--ctl-border); background: var(--surface); padding: 0 8px; font-size: 13px; }
+.imp-row.off .imp-main b, .imp-row.off .tx-amt { opacity: .5; }
+.imp-foot { position: sticky; bottom: calc(-20px - env(safe-area-inset-bottom, 0px)); display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: var(--div-border); font-size: 14px; font-weight: 600; }
+.imp-foot .btn { min-width: 0; }
+.btn:disabled { opacity: .5; }
+
 </style>
 <div class="app" id="app">
   <header class="top">
@@ -671,6 +691,8 @@ button { cursor: pointer; }
     <div id="sheetBody"></div>
   </div>
 </div>
+
+<input type="file" id="stmtFile" accept=".csv,text/csv,text/comma-separated-values,application/vnd.ms-excel,text/plain" hidden>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden>
   <span id="toastText"></span><button type="button" id="toastUndo">Undo</button>
@@ -767,8 +789,8 @@ button { cursor: pointer; }
 
   // UK shops and brands: [proper name, category, ...other ways people write it]. Used to tidy names and spot typos.
   const MERCHANTS = [
-    ['Tesco', 'groceries', 'tescos', 'tesco express', 'tesco extra', 'tesco metro'],
-    ["Sainsbury's", 'groceries', 'sains', 'sainsburys', 'sainsbury', 'sainos', 'sainsburies', 'sainsbos', 'sainsburys local'],
+    ['Tesco', 'groceries', 'tescos', 'tesco express', 'tesco extra', 'tesco metro', 'tesco stores', 'tesco store', 'tesco pfs'],
+    ["Sainsbury's", 'groceries', 'sains', 'sainsburys', 'sainsbury', 'sainos', 'sainsburies', 'sainsbos', 'sainsburys local', 'js online grocery', 'sainsburys s/mkts', 'sainsburys smkt'],
     ['Asda', 'groceries', 'asdas'],
     ['Morrisons', 'groceries', 'morrys', 'morries', 'morrison', 'morrissons'],
     ['Aldi', 'groceries', 'aldis'],
@@ -787,7 +809,7 @@ button { cursor: pointer; }
     ['Toby Carvery', 'eating', 'toby', 'tobys'], ['Harvester', 'eating'], ['Zizzi', 'eating', 'zizzis'], ['Prezzo', 'eating'], ['Dishoom', 'eating'],
     ['Tim Hortons', 'eating', 'timmies'], ['Taco Bell', 'eating'], ['Krispy Kreme', 'eating'],
     ['Shell', 'transport'], ['BP', 'transport'], ['Esso', 'transport'], ['Texaco', 'transport'],
-    ['TfL', 'transport', 'oyster', 'tfl travel'], ['Trainline', 'transport', 'the trainline'], ['Uber', 'transport'], ['Bolt', 'transport'],
+    ['TfL', 'transport', 'oyster', 'tfl travel', 'tfl travel ch', 'tfl.gov.uk'], ['Trainline', 'transport', 'the trainline'], ['Uber', 'transport'], ['Bolt', 'transport'],
     ['National Express', 'transport'], ['Megabus', 'transport'], ['LNER', 'transport'], ['GWR', 'transport'], ['Avanti', 'transport', 'avanti west coast'],
     ['RingGo', 'transport', 'ringo', 'ring go'], ['PayByPhone', 'transport', 'pay by phone'], ['JustPark', 'transport', 'just park'],
     ['Halfords', 'transport'], ['Kwik Fit', 'transport', 'kwikfit'],
@@ -795,10 +817,10 @@ button { cursor: pointer; }
     ['OVO', 'bills', 'ovo energy'], ['Scottish Power', 'bills'], ['BT', 'bills', 'bt broadband'], ['Sky', 'bills'], ['Virgin Media', 'bills', 'virgin'],
     ['EE', 'bills'], ['Vodafone', 'bills'], ['O2', 'bills'], ['giffgaff', 'bills', 'giff gaff'], ['Thames Water', 'bills'], ['Severn Trent', 'bills'],
     ['TV Licence', 'bills', 'tv license', 'tv licensing'],
-    ['Netflix', 'subs'], ['Spotify', 'subs'], ['Disney+', 'subs', 'disney', 'disney plus', 'disneyplus'], ['Amazon Prime', 'subs', 'prime', 'prime video'],
+    ['Netflix', 'subs', 'netflix.com'], ['Spotify', 'subs', 'spotify uk', 'spotify p'], ['Disney+', 'subs', 'disney', 'disney plus', 'disneyplus'], ['Amazon Prime', 'subs', 'prime', 'prime video'],
     ['iCloud', 'subs', 'apple icloud'], ['YouTube Premium', 'subs', 'youtube'], ['Audible', 'subs'], ['NOW', 'subs', 'now tv', 'nowtv'],
     ['Xbox Game Pass', 'subs', 'game pass', 'gamepass'], ['PlayStation Plus', 'subs', 'ps plus', 'psplus'], ['ChatGPT', 'subs', 'chat gpt'],
-    ['Amazon', 'shopping', 'amzn', 'amazon uk', 'amazon.co.uk'], ['Argos', 'shopping'], ['Primark', 'shopping', 'primarni'], ['Next', 'shopping'],
+    ['Amazon', 'shopping', 'amzn', 'amazon uk', 'amazon.co.uk', 'amznmktplace', 'amzn mktp', 'amazon mktplace', 'amazon marketplace', 'amznmktp', 'amazon.co.uk*', 'amazon retail'], ['Argos', 'shopping'], ['Primark', 'shopping', 'primarni'], ['Next', 'shopping'],
     ['Zara', 'shopping'], ['H&M', 'shopping', 'h and m'], ['ASOS', 'shopping'], ['TK Maxx', 'shopping', 'tkmaxx', 'tk max', 'tkmax'],
     ['John Lewis', 'shopping', 'jlp', 'john lewis and partners'], ['Currys', 'shopping', 'currys pc world', 'pc world'], ['eBay', 'shopping'],
     ['Vinted', 'shopping'], ['Etsy', 'shopping'], ['Uniqlo', 'shopping'], ['JD Sports', 'shopping', 'jd'], ['Sports Direct', 'shopping'],
@@ -1097,9 +1119,260 @@ button { cursor: pointer; }
     return out;
   }
 
-  const api = { CATEGORIES, KEYWORDS, MERCHANTS, merchantForWord, editDistance, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
+  /** First known shop mentioned anywhere in a piece of text, e.g. a bank description. Returns {name, cat} or null. */
+  function findMerchant(text) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lw = words.map((w) => nk(w));
+    for (let i = 0; i < words.length; i++) {
+      for (const [parts, mi] of MERCH_PHRASE) if (parts.length > 1 && parts.every((p, j) => lw[i + j] === p)) return { name: MERCHANTS[mi][0], cat: MERCHANTS[mi][1] };
+      const mi = merchantForWord(words[i]);
+      if (mi >= 0) return { name: MERCHANTS[mi][0], cat: MERCHANTS[mi][1] };
+    }
+    return null;
+  }
+
+  const api = { CATEGORIES, KEYWORDS, MERCHANTS, findMerchant, merchantForWord, editDistance, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TallyParser = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* Bank statement (CSV) reader. Pure functions, no DOM. Browser: window.Statement. Node: module.exports.
+   Understands the CSV downloads from the main UK banks and cards, with or without a header row. */
+(function (root) {
+  'use strict';
+  const TP = typeof module !== 'undefined' && module.exports ? require('./parser.js') : root.TallyParser;
+
+  /** RFC 4180-style CSV: quoted fields, doubled quotes, commas or semicolons, CRLF, BOM. */
+  function parseCSV(text) {
+    text = String(text || '').replace(/^﻿/, '');
+    const firstLine = text.split(/\r?\n/).find((l) => l.trim()) || '';
+    const delim = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : (firstLine.includes('\t') && !firstLine.includes(',') ? '\t' : ',');
+    const rows = [];
+    let row = [], field = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+        else field += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === delim) { row.push(field); field = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); field = '';
+        if (row.some((c) => c.trim() !== '')) rows.push(row.map((c) => c.trim()));
+        row = [];
+      } else field += ch;
+    }
+    row.push(field);
+    if (row.some((c) => c.trim() !== '')) rows.push(row.map((c) => c.trim()));
+    return rows;
+  }
+
+  const MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 };
+  const pad = (n) => String(n).padStart(2, '0');
+  /** UK dates: 05/11/2026, 5/11/26, 2026-11-05 (with time), 05 Nov 2026, 05-Nov-26, 5 November 2026. Returns YYYY-MM-DD or null. */
+  function parseDate(s) {
+    s = String(s || '').trim();
+    let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+    if (m) return valid(+m[1], +m[2], +m[3]);
+    m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})\b/.exec(s);
+    if (m) return valid(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[2], +m[1]);
+    m = /^(\d{1,2})[\s-]+([A-Za-z]{3,9})[\s-]+(\d{2}|\d{4})\b/.exec(s);
+    if (m) {
+      const mon = MONTHS[m[2].slice(0, 4).toLowerCase()] || MONTHS[m[2].slice(0, 3).toLowerCase()];
+      if (mon) return valid(m[3].length === 2 ? 2000 + +m[3] : +m[3], mon, +m[1]);
+    }
+    return null;
+    function valid(y, mo, d) {
+      const dt = new Date(y, mo - 1, d, 12);
+      return dt.getMonth() === mo - 1 && y > 1990 && y < 2100 ? `${y}-${pad(mo)}-${pad(d)}` : null;
+    }
+  }
+
+  /** "-£1,234.56", "(23.40)", "23.40 DR", "£5" -> pence (negative = money out as written). null if not money. */
+  function parseMoney(s) {
+    let t = String(s == null ? '' : s).trim();
+    if (!t) return null;
+    let neg = false;
+    if (/^\(.*\)$/.test(t)) { neg = true; t = t.slice(1, -1); }
+    if (/\s*(DR|D)$/i.test(t)) { neg = true; t = t.replace(/\s*(DR|D)$/i, ''); }
+    t = t.replace(/\s*(CR|C)$/i, '');
+    t = t.replace(/[£$€\s,]|GBP/gi, '');
+    if (t.startsWith('-')) { neg = !neg; t = t.slice(1); }
+    if (t.startsWith('+')) t = t.slice(1);
+    if (!/^\d+(\.\d{1,2})?$|^\.\d{1,2}$/.test(t)) return null;
+    const p = Math.round(parseFloat(t) * 100);
+    return neg ? -p : p;
+  }
+
+  const H = {
+    date: /^(transaction |posted |posting |completed |started |value )?date( of transaction)?$|^date$/,
+    desc: /^(description|transaction description|details|narrative|name|merchant|payee|counter ?party|memo|reference|transaction details|particulars)$/,
+    amount: /^(amount|value|amount \(gbp\)|amount gbp|transaction amount|net amount|billing amount)$/,
+    out: /^(paid out|money out|debit|debit amount|withdrawals?|out|spent|payments?)$/,
+    in: /^(paid in|money in|credit|credit amount|deposits?|in|received|receipts?)$/,
+    type: /^(type|transaction type)$/,
+    cat: /^(category|spending category|subcategory)$/,
+    extra: /^(memo|notes|notes and #tags|reference|description)$/,
+  };
+  const norm = (h) => String(h || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+  function findHeader(rows) {
+    for (let i = 0; i < Math.min(rows.length, 25); i++) {
+      const hs = rows[i].map(norm);
+      const has = (re) => hs.findIndex((h) => re.test(h));
+      const d = has(H.date), a = has(H.amount), o = has(H.out), n = has(H.in);
+      if (d >= 0 && (a >= 0 || o >= 0 || n >= 0)) return i;
+    }
+    return -1;
+  }
+
+  /** Guess columns for a file with no header row (HSBC, First Direct): a date column, a money column, the longest text column. */
+  function guessColumns(rows) {
+    const sample = rows.slice(0, 30), cols = Math.max(...sample.map((r) => r.length));
+    const score = (fn) => Array.from({ length: cols }, (_, c) => sample.filter((r) => fn(r[c])).length);
+    const dates = score((v) => !!parseDate(v)), money = score((v) => parseMoney(v) !== null && /\d/.test(v || ''));
+    const text = Array.from({ length: cols }, (_, c) => sample.reduce((a, r) => a + (/[a-z]/i.test(r[c] || '') ? (r[c] || '').length : 0), 0));
+    const date = dates.indexOf(Math.max(...dates));
+    const desc = text.indexOf(Math.max(...text));
+    let amount = -1, best = -1;
+    money.forEach((v, c) => { if (c !== date && c !== desc && v > best) { best = v; amount = c; } });
+    return { date, desc, amount, out: -1, in: -1, type: -1, cat: -1, extra: -1 };
+  }
+
+  function bankName(header) {
+    const h = header.map(norm).join('|');
+    if (h.includes('emoji') || (h.includes('money out') && h.includes('local amount'))) return 'Monzo';
+    if (h.includes('counter party') && h.includes('spending category')) return 'Starling';
+    if (h.includes('started date') && h.includes('completed date')) return 'Revolut';
+    if (h.includes('sort code') && h.includes('debit amount')) return 'Lloyds, Halifax or Bank of Scotland';
+    if (h.includes('subcategory') && h.includes('memo')) return 'Barclays';
+    if (h.includes('paid out') && h.includes('paid in')) return 'Nationwide';
+    if (h.includes('account name') && h.includes('value')) return 'NatWest or RBS';
+    return null;
+  }
+
+  /** Reads a CSV statement into rows of { date, raw, amount (pence, negative = out), bankType, bankCat }. */
+  function readStatement(text) {
+    const rows = parseCSV(text);
+    if (!rows.length) return { rows: [], bank: null, error: 'That file is empty.' };
+    const hi = findHeader(rows);
+    let cols, body, bank = null;
+    if (hi >= 0) {
+      const hs = rows[hi].map(norm);
+      const idx = (re, not) => hs.findIndex((h, i) => re.test(h) && !(not || []).includes(i));
+      const date = idx(H.date);
+      const amount = idx(H.amount);
+      const out = amount >= 0 ? -1 : idx(H.out), inn = amount >= 0 ? -1 : idx(H.in);
+      // description: prefer a merchant-ish column ("Name", "Counter Party", "Description"), then memo
+      let desc = hs.findIndex((h) => /^(name|counter ?party|merchant|payee)$/.test(h));
+      if (desc < 0) desc = idx(H.desc);
+      const extra = hs.findIndex((h, i) => i !== desc && /^(memo|description|reference|transaction description)$/.test(h));
+      cols = { date, desc, amount, out, in: inn, type: idx(H.type), cat: idx(H.cat), extra };
+      body = rows.slice(hi + 1);
+      bank = bankName(rows[hi]);
+    } else {
+      cols = guessColumns(rows);
+      body = rows;
+      bank = 'HSBC or First Direct';
+    }
+    if (cols.date < 0 || cols.desc < 0 || (cols.amount < 0 && cols.out < 0 && cols.in < 0)) {
+      return { rows: [], bank, error: "Couldn't find the date, description and amount columns in that file." };
+    }
+    const out = [];
+    for (const r of body) {
+      const date = parseDate(r[cols.date]);
+      if (!date) continue;
+      let amount = null;
+      if (cols.amount >= 0) amount = parseMoney(r[cols.amount]);
+      else {
+        const o = cols.out >= 0 ? parseMoney(r[cols.out]) : null, n = cols.in >= 0 ? parseMoney(r[cols.in]) : null;
+        if (o) amount = -Math.abs(o); else if (n) amount = Math.abs(n);
+      }
+      if (!amount) continue;
+      let raw = r[cols.desc] || '';
+      if ((!raw || raw.length < 3) && cols.extra >= 0) raw = r[cols.extra] || raw;
+      if (/[A-Za-z]/.test(r[cols.extra] || '') && cols.extra >= 0 && raw.length < 4) raw = r[cols.extra];
+      out.push({ date, raw: raw.trim(), amount, bankType: cols.type >= 0 ? r[cols.type] || '' : '', bankCat: cols.cat >= 0 ? r[cols.cat] || '' : '' });
+    }
+    if (!out.length) return { rows: [], bank, error: 'No transactions found in that file.' };
+    // Credit cards (Amex and others) list spending as positive amounts. If nearly everything is positive, flip it.
+    const pos = out.filter((x) => x.amount > 0).length;
+    const flipped = cols.amount >= 0 && out.length >= 3 && pos / out.length > 0.7;
+    if (flipped) for (const x of out) x.amount = -x.amount;
+    return { rows: out, bank, flipped };
+  }
+
+  // ---- making sense of bank descriptions ----
+  const NOISE = /\b(card payment to|card payment|contactless payment|contactless|payment to|payment from|debit card|visa purchase|purchase|pos|bcc|clp|dpc|vis|ddr|card|ref|reference|on \d{1,2}[ -/][a-z0-9]{2,3}([ -/]\d{2,4})?|gb|gbr|uk|london|manchester|birmingham|leeds|glasgow|bristol|edinburgh|liverpool|internet|online|apple pay|google pay|gpay)\b/g;
+  function cleanDescription(raw) {
+    let s = String(raw || '').toLowerCase();
+    s = s.replace(/^(dd|so|fpo|fpi|bgc|cr|tfr|bp|cpt|chq|deb)\s+/, '');
+    s = s.replace(/\*[a-z0-9]{4,}/g, ' ').replace(/\b[a-z]*\d[a-z0-9]{5,}\b/g, ' ');
+    s = s.replace(/\bpaypal \*/g, '').replace(/\bpaypal\s*\*?/g, '');
+    s = s.replace(/https?:\/\/\S+/g, ' ').replace(/\.(com|co\.uk|uk|net)\b/g, '');
+    s = s.replace(NOISE, ' ').replace(/\b\d{2,}\b/g, ' ').replace(/[^a-z&'+ ]/g, ' ');
+    return s.replace(/\s+/g, ' ').trim();
+  }
+
+  // Moves between your own accounts, pots and card repayments: not spending or income.
+const TRANSFER = /\b(transfer|tfr|to savings|from savings|savings pot|pot transfer|own account|moved to|moved from|round ?up|between accounts|internal|payment received|thank you|card repayment|credit card payment|balance transfer|amex|american express|barclaycard)\b/i;
+  const BANK_CATS = [
+    [/grocer/i, 'groceries'], [/eating|restaurant|takeaway|food and drink|coffee/i, 'eating'], [/transport|travel|fuel|car/i, 'transport'],
+    [/bill|utilit|household|energy/i, 'bills'], [/shopping|retail/i, 'shopping'], [/entertain|leisure/i, 'fun'], [/holiday/i, 'travel'],
+    [/personal care|beauty|health/i, 'personal'], [/gift/i, 'gifts'], [/charit/i, 'gifts'], [/famil|kids|child/i, 'kids'], [/pet/i, 'pets'],
+    [/saving/i, 'savings'], [/invest/i, 'invest'],
+  ];
+  const titleWords = (s, n) => TP.titleCase(s.split(' ').slice(0, n).join(' '));
+
+  /**
+   * Turns statement rows into suggested entries, marking ones that look already logged or are transfers.
+   * ctx: { existing: [txns], learned, aliases }
+   */
+  function suggest(rows, ctx) {
+    ctx = ctx || {};
+    const existing = ctx.existing || [], learned = ctx.learned || {}, aliases = ctx.aliases || {};
+    const seen = new Set(existing.map((t) => t.imp).filter(Boolean));
+    const dayNum = (d) => Math.round(new Date(d + 'T12:00:00').getTime() / 864e5);
+    const pool = existing.map((t) => ({ t, day: dayNum(t.date), used: false }));
+    return rows.map((r) => {
+      const imp = `${r.date}|${r.amount}|${r.raw.toLowerCase().replace(/\s+/g, ' ')}`;
+      const clean = cleanDescription(r.raw);
+      const alias = aliases[TP.normKey(clean)];
+      const m = alias ? (TP.findMerchant(alias) || { name: alias, cat: null }) : TP.findMerchant(clean) || TP.findMerchant(r.raw.toLowerCase());
+      const desc = m ? m.name : titleWords(clean, 3) || titleWords(r.raw.toLowerCase(), 3) || 'Bank entry';
+      const mkey = TP.normKey(desc);
+      const kwCat = TP.keywordCategory(TP.normKey(clean));
+      const bankCat = (BANK_CATS.find(([re]) => re.test(r.bankCat)) || [])[1];
+      let cat = learned[mkey] || (m && m.cat) || kwCat || bankCat || 'other';
+      let type = r.amount < 0 ? 'out' : 'in';
+      const isSaveCat = cat === 'savings' || cat === 'invest';
+      let kind = 'new';
+      if (type === 'in') cat = isSaveCat ? cat : 'income';
+      else if (isSaveCat) type = 'save';
+      else if (cat === 'income') cat = 'other';
+      // Moves between your own accounts or pots are left out by default. Payments to a known savings or investment
+      // provider (Vanguard, Moneybox, Premium Bonds) are real saving, so they stay in.
+      const provider = m && (m.cat === 'savings' || m.cat === 'invest');
+      if (!provider && (TRANSFER.test(r.raw) || /transfer|pot/i.test(r.bankType))) kind = 'transfer';
+      const amt = Math.abs(r.amount);
+      if (seen.has(imp)) kind = 'imported';
+      else if (kind === 'new') {
+        // Already logged by hand (or by a fixed cost): same amount, same direction, within 3 days. Name match first.
+        const d = dayNum(r.date);
+        const near = pool.filter((p) => !p.used && p.t.amt === amt && ((p.t.type === 'in') === (type === 'in')) && Math.abs(p.day - d) <= 3);
+        const hit = near.find((p) => p.t.mkey === mkey) || near[0];
+        if (hit) { hit.used = true; kind = 'dupe'; }
+      }
+      return { date: r.date, raw: r.raw, desc, mkey, cat, type, amt, imp, kind, rawKey: TP.normKey(clean) };
+    });
+  }
+
+  const api = { parseCSV, parseDate, parseMoney, readStatement, cleanDescription, suggest };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.Statement = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1713,6 +1986,7 @@ function renderActivity() {
   const s = sums(list);
   const searchHad = document.activeElement && document.activeElement.id === 'actSearch';
   el.innerHTML = `<div class="stack">${monthNav()}
+    <button type="button" class="btn import-btn" data-import><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Import a bank statement</button>
     <input class="search" id="actSearch" type="search" placeholder="Search entries" value="${esc(ui.q)}" aria-label="Search entries">
     <div class="pills" role="group" aria-label="Filter">${filters.map(([v, l]) => `<button type="button" class="pill" data-filter="${esc(v)}" aria-pressed="${ui.filter === v}">${esc(l)}</button>`).join('')}</div>
     <div><p class="hint">${list.length} entr${list.length === 1 ? 'y' : 'ies'} · spent <b>${money(s.out)}</b>${s.save ? ` · saved <b class="sv">${money(s.save)}</b>` : ''}${s.in ? ` · in <b class="pos">${money(s.in)}</b>` : ''}</p>
@@ -2331,6 +2605,115 @@ function recapPending() {
   return +t.slice(8) <= 7 && S.recap.month !== cur && outRange(pm + '-01', `${pm}-${daysIn(pm)}`, 'all').length > 0;
 }
 
+// ---- 58-import.js ----
+// ---------- Bank statement import ----------
+// Pick a CSV, review every transaction, then import the ticked ones in one go (with undo).
+const IMP_TABS = [['new', 'New'], ['dupe', 'Already logged'], ['transfer', 'Transfers'], ['all', 'All']];
+let imp = null;
+
+function startImport() {
+  const f = $('#stmtFile');
+  f.value = '';
+  f.click();
+}
+$('#stmtFile').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (file.size > 5e6) { toast('That file is too big for a statement. Try a shorter date range.'); return; }
+  file.text().then((text) => openImport(text, file.name), () => toast("Couldn't read that file"));
+});
+
+function openImport(text, fileName) {
+  const read = Statement.readStatement(text);
+  if (read.error) { toast(read.error); return; }
+  imp = { read, fileName, who: isPair() ? S.defaultWho : null, tab: 'new', flipped: !!read.flipped };
+  buildSuggestions();
+  imp.tab = imp.rows.some((r) => r.kind === 'new') ? 'new' : 'all';
+  openSheet('Import statement', importHTML(), importAction);
+}
+function buildSuggestions() {
+  const rows = imp.read.rows.map((r) => Object.assign({}, r, { amount: imp.flipped !== !!imp.read.flipped ? -r.amount : r.amount }));
+  imp.rows = Statement.suggest(rows, { existing: S.txns.filter((t) => !t.example), learned: S.learned, aliases: S.aliases });
+  imp.rows.forEach((r, i) => { r.i = i; r.on = r.kind === 'new'; r.cat0 = r.cat; });
+}
+function importHTML() {
+  const rows = imp.rows;
+  const count = (k) => rows.filter((r) => r.kind === k || (k === 'dupe' && r.kind === 'imported')).length;
+  const dates = rows.map((r) => r.date).sort();
+  const shown = rows.filter((r) => imp.tab === 'all' || r.kind === imp.tab || (imp.tab === 'dupe' && r.kind === 'imported'));
+  const on = rows.filter((r) => r.on);
+  const out = on.filter((r) => r.type === 'out').reduce((a, r) => a + r.amt, 0);
+  const label = { new: '', dupe: 'Looks already logged', imported: 'Imported before', transfer: 'Transfer between accounts' };
+  const catOpts = (r) => (r.type === 'in' ? CATS : OUT_CATS).map((c) => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  return `<div class="form imp">
+    <p class="imp-sum"><b>${esc(imp.read.bank || 'Bank statement')}</b> · ${esc(shortDate(dates[0]))} – ${esc(shortDate(dates[dates.length - 1]))} · ${rows.length} transaction${rows.length === 1 ? '' : 's'}</p>
+    ${imp.flipped ? `<div class="notice imp-note"><p>This looks like a credit card statement, so positive amounts are treated as spending.</p><button type="button" class="btn" data-act="flip">Swap in and out</button></div>`
+      : `<button type="button" class="link imp-swap" data-act="flip">Spending and income the wrong way round? Swap them</button>`}
+    ${isPair() ? `<div class="field"><span>Whose account is this?</span><div class="segctl" role="group" aria-label="Whose account">${S.people.concat('shared').map((w) =>
+      `<button type="button" data-act="who" data-v="${esc(w)}" aria-pressed="${imp.who === w}">${esc(whoLabel(w))}</button>`).join('')}</div></div>` : ''}
+    <div class="pills" role="tablist" aria-label="Show">${IMP_TABS.map(([k, l]) => `<button type="button" class="pill" role="tab" data-act="tab" data-v="${k}" aria-pressed="${imp.tab === k}">${l} ${k === 'all' ? rows.length : count(k)}</button>`).join('')}</div>
+    ${imp.tab === 'dupe' ? '<p class="hint">Same amount within 3 days of something already in the app. Tick any that are actually new.</p>' : ''}
+    ${imp.tab === 'transfer' ? "<p class=\"hint\">Money moved between your own accounts or pots isn't spending, so these are left out. Tick any you want to keep.</p>" : ''}
+    ${shown.length ? `<ul class="list imp-list">${shown.map((r) => `<li class="imp-row${r.on ? '' : ' off'}">
+      <input type="checkbox" data-act="tick" data-i="${r.i}" ${r.on ? 'checked' : ''} aria-label="Import ${esc(r.desc)} ${money(r.amt)}">
+      <span class="imp-main"><b>${esc(r.desc)}</b>
+        <small>${esc(shortDate(r.date))}${label[r.kind] ? ` · <span class="imp-flag">${label[r.kind]}</span>` : ''}</small>
+        <select class="imp-cat" data-imp-cat="${r.i}" aria-label="Category for ${esc(r.desc)}">${catOpts(r)}</select>
+        <small class="imp-raw" title="As it appears on the statement">${esc(r.raw)}</small></span>
+      <span class="tx-amt ${r.type === 'in' ? 'in' : r.type === 'save' ? 'save' : ''}">${r.type === 'in' ? '+' : ''}${money(r.amt)}${r.type === 'save' ? `<small>${saveWord(r.cat)}</small>` : ''}</span></li>`).join('')}</ul>`
+      : '<p class="empty">Nothing here.</p>'}
+    <div class="imp-foot"><span>${on.length} selected${out ? ` · ${money(out)} spent` : ''}</span>
+      <button type="button" class="btn primary" data-act="go" ${on.length ? '' : 'disabled'}>Import ${on.length} entr${on.length === 1 ? 'y' : 'ies'}</button></div>
+  </div>`;
+}
+function rerenderImport() {
+  const scroll = $('#sheet .sheet').scrollTop;
+  sheetBody.innerHTML = importHTML();
+  $('#sheet .sheet').scrollTop = scroll;
+}
+function importAction(act, el) {
+  if (!imp) return;
+  if (act === 'tab') { imp.tab = el.dataset.v; rerenderImport(); }
+  else if (act === 'who') { imp.who = el.dataset.v; rerenderImport(); }
+  else if (act === 'tick') { const r = imp.rows[+el.dataset.i]; r.on = el.checked; rerenderImport(); }
+  else if (act === 'flip') { imp.flipped = !imp.flipped; buildSuggestions(); rerenderImport(); }
+  else if (act === 'go') finishImport();
+}
+sheetBody.addEventListener('change', (e) => {
+  const sel = e.target.closest('[data-imp-cat]');
+  if (!sel || !imp) return;
+  const r = imp.rows[+sel.dataset.impCat];
+  r.cat = sel.value;
+  if (r.type !== 'in') r.type = isSave(r.cat) ? 'save' : 'out';
+  rerenderImport();
+});
+
+function finishImport() {
+  const chosen = imp.rows.filter((r) => r.on);
+  if (!chosen.length) return;
+  const now = Date.now(), added = [], learnedBefore = {};
+  chosen.forEach((r, k) => {
+    // a category changed here is remembered for that shop, just like everywhere else
+    if (r.cat !== r.cat0 && r.mkey && r.type !== 'in') {
+      if (!(r.mkey in learnedBefore)) learnedBefore[r.mkey] = S.learned[r.mkey];
+      S.learned[r.mkey] = r.cat;
+    }
+    const t = { id: uid() + k, amt: r.amt, type: r.type, desc: r.desc, mkey: r.mkey, rawKey: r.rawKey || undefined, cat: r.cat, date: r.date,
+      who: isPair() ? imp.who || S.defaultWho : null, ts: now + k, imp: r.imp };
+    S.txns.push(t);
+    added.push(t.id);
+  });
+  imp = null;
+  closeSheet();
+  save(); refresh();
+  toast(`Imported ${added.length} entr${added.length === 1 ? 'y' : 'ies'}`, () => {
+    const ids = new Set(added);
+    S.txns = S.txns.filter((t) => !ids.has(t.id));
+    for (const [k, v] of Object.entries(learnedBefore)) { if (v === undefined) delete S.learned[k]; else S.learned[k] = v; }
+    save(); refresh();
+  });
+}
+
 // ---- 60-settings.js ----
 // ---------- Themes ----------
 const STYLES = [
@@ -2393,6 +2776,10 @@ function renderPrefs() {
       ${aliases.length ? `<div class="setlist" style="margin-top:10px">${aliases.map(([k, v]) => `<div><span>“${esc(k)}” means <b>${esc(v)}</b></span>
         <button type="button" class="link" data-unalias="${esc(k)}">Forget</button></div>`).join('')}</div>` : ''}
     </div></section>
+
+    <section><div class="sec-h"><h2>Bank statements</h2></div><div class="card form">
+      <p class="hint">Download a CSV statement from your bank's app or website, then import it here. You'll see every transaction before anything is added, and ones you've already logged are left out.</p>
+      <button type="button" class="btn primary" data-import>Import a bank statement</button></div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
       <p class="hint">Entries are stored on this device only. Export a backup now and then. To combine two phones, export on one and import on the other; matching entries are merged, not duplicated.</p>
@@ -2513,6 +2900,7 @@ document.addEventListener('click', (e) => {
     joinHousehold($('#obCode').value).then((ok) => { btn.disabled = false; btn.textContent = 'Join household'; if (ok) { $('#onboard').hidden = true; qa.input.focus(); } });
     return;
   }
+  if (t.closest('[data-import]')) return startImport();
   if (t.closest('[data-keep-examples]')) { S.exKeep = true; save(); renderHome(); return; }
   if ((b = t.closest('[data-default-who]'))) { S.defaultWho = b.dataset.defaultWho; save(); refresh(); return; }
   if ((b = t.closest('[data-unalias]'))) { const k = b.dataset.unalias, v = S.aliases[k]; delete S.aliases[k]; save(); refresh(); return toast(`Forgot “${k}”`, () => { S.aliases[k] = v; save(); refresh(); }); }

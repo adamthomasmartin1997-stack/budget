@@ -581,3 +581,23 @@ button { cursor: pointer; }
 .top-meta { white-space: nowrap; }
 @media (max-width: 380px) { .top-meta { display: none; } .brand { font-size: 18px; } }
 .brand-mark { flex: none; }
+
+/* statement import */
+.import-btn { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.imp { gap: 12px; }
+.imp-sum { margin: 0; font-size: 14px; }
+.imp-swap { justify-self: start; font-size: 12px; color: var(--ink-2) !important; font-weight: 500 !important; text-decoration: underline; }
+.imp-note { padding: 10px 12px; }
+.imp-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 14px; }
+.imp-list input[type=checkbox] { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); }
+.imp-main { display: grid; gap: 3px; min-width: 0; }
+.imp-main b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.imp-main small { color: var(--ink-2); font-size: 12px; }
+.imp-raw { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .8; }
+.imp-flag { color: var(--warn); font-weight: 600; }
+.imp-cat { justify-self: start; max-width: 100%; height: 32px; border-radius: var(--r-xs); border: var(--ctl-border); background: var(--surface); padding: 0 8px; font-size: 13px; }
+.imp-row.off .imp-main b, .imp-row.off .tx-amt { opacity: .5; }
+.imp-foot { position: sticky; bottom: calc(-20px - env(safe-area-inset-bottom, 0px)); display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: var(--div-border); font-size: 14px; font-weight: 600; }
+.imp-foot .btn { min-width: 0; }
+.btn:disabled { opacity: .5; }

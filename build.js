@@ -1,7 +1,7 @@
 // Builds dist/ (installable PWA) and artifact/tally.html (single-page preview) from src/.
 const fs = require('fs'), path = require('path');
 const r = (f) => fs.readFileSync(path.join(__dirname, 'src', f), 'utf8');
-const css = r('styles.css'), body = r('body.html'), parser = r('parser.js');
+const css = r('styles.css'), body = r('body.html'), parser = r('parser.js'), statement = r('statement.js');
 // The app is written as ordered modules in src/app/ that share one scope; they are joined inside a single closure.
 const appDir = path.join(__dirname, 'src', 'app');
 const app = "(function () {\n'use strict';\n" + fs.readdirSync(appDir).filter((f) => f.endsWith('.js')).sort()
@@ -9,7 +9,7 @@ const app = "(function () {\n'use strict';\n" + fs.readdirSync(appDir).filter((f
 const version = 'tally-' + Date.now().toString(36);
 const fonts = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
   '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=Manrope:wght@400;500;600;700;800&display=swap">';
-const scripts = (pwa) => `<script>${pwa ? 'window.TALLY_PWA=true;' : ''}</script>\n<script>\n${parser}\n</script>\n<script>\n${app}\n</script>`;
+const scripts = (pwa) => `<script>${pwa ? 'window.TALLY_PWA=true;' : ''}</script>\n<script>\n${parser}\n</script>\n<script>\n${statement}\n</script>\n<script>\n${app}\n</script>`;
 
 const pwa = `<!doctype html>
 <html lang="en-GB" data-style="pop">

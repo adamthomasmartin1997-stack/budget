@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.js",
     "dev": "node build.js && node dev-server.mjs",
-    "test": "node test/parser.test.js && node test/merge.test.mjs",
+    "test": "node test/parser.test.js && node test/statement.test.js && node test/merge.test.mjs",
     "test:sync": "node test/sync.e2e.mjs"
   },
   "dependencies": {

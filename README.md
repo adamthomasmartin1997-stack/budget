@@ -9,6 +9,7 @@ A household budget tracker for one or two people. Logging a cost is one line: `t
 - **Income:** money in this month, what's still to come, regular income (salaries log themselves on payday), where the money went, and the last 12 months.
 - **Budget:** savings goals (target, progress, when you'll get there) and a monthly budget for each category.
 - **Activity** (list icon, top right): every entry, searchable.
+- **Import a bank statement** (in Activity and Settings): download a CSV from your bank and import it. Works with Monzo, Starling, Revolut, HSBC, First Direct, Barclays, Lloyds, Halifax, Nationwide, NatWest, Santander and credit cards like Amex. Shop names are cleaned up and categorised, anything already logged (by hand or as a fixed cost) and transfers between your own accounts are left unticked, and you review everything before it's added. Importing the same file twice adds nothing.
 - **Settings** (sliders icon): sync between phones, names, style, shorthand guide, learned merchants, backup.
 
 It knows about 180 UK shops and brands, including nicknames and typos: `sains` is Sainsbury's, `maccies` is McDonald's, `spoons` is Wetherspoons, `tescp` is Tesco. Correct a name once (in the preview or by editing an entry) and it remembers that spelling on both phones.

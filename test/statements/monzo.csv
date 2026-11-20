@@ -1,0 +1,6 @@
+Transaction ID,Date,Time,Type,Name,Emoji,Category,Amount,Currency,Local amount,Local currency,Notes and #tags,Address,Receipt,Description,Category split,Money Out,Money In
+tx_0001,03/11/2026,08:12:40,Card payment,Pret A Manger,🥪,Eating out,-6.45,GBP,-6.45,GBP,,1 High St,,PRET A MANGER LONDON GBR,,-6.45,
+tx_0002,04/11/2026,18:40:02,Card payment,Sainsbury's,🛒,Groceries,-41.12,GBP,-41.12,GBP,,,,SAINSBURYS S/MKTS LONDON GBR,,-41.12,
+tx_0003,05/11/2026,09:00:00,Pot transfer,Savings,💰,Savings,-100.00,GBP,-100.00,GBP,,,,pot_00009,,-100.00,
+tx_0004,07/11/2026,12:01:11,Card payment,Netflix,📺,Entertainment,-10.99,GBP,-10.99,GBP,,,,NETFLIX.COM,,-10.99,
+tx_0005,25/11/2026,06:00:00,Faster payment,ACME LTD,💷,Income,2400.00,GBP,2400.00,GBP,SALARY,,,ACME LTD SALARY,,,2400.00

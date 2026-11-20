@@ -52,6 +52,7 @@ function renderActivity() {
   const s = sums(list);
   const searchHad = document.activeElement && document.activeElement.id === 'actSearch';
   el.innerHTML = `<div class="stack">${monthNav()}
+    <button type="button" class="btn import-btn" data-import><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Import a bank statement</button>
     <input class="search" id="actSearch" type="search" placeholder="Search entries" value="${esc(ui.q)}" aria-label="Search entries">
     <div class="pills" role="group" aria-label="Filter">${filters.map(([v, l]) => `<button type="button" class="pill" data-filter="${esc(v)}" aria-pressed="${ui.filter === v}">${esc(l)}</button>`).join('')}</div>
     <div><p class="hint">${list.length} entr${list.length === 1 ? 'y' : 'ies'} · spent <b>${money(s.out)}</b>${s.save ? ` · saved <b class="sv">${money(s.save)}</b>` : ''}${s.in ? ` · in <b class="pos">${money(s.in)}</b>` : ''}</p>

@@ -87,8 +87,8 @@
 
   // UK shops and brands: [proper name, category, ...other ways people write it]. Used to tidy names and spot typos.
   const MERCHANTS = [
-    ['Tesco', 'groceries', 'tescos', 'tesco express', 'tesco extra', 'tesco metro'],
-    ["Sainsbury's", 'groceries', 'sains', 'sainsburys', 'sainsbury', 'sainos', 'sainsburies', 'sainsbos', 'sainsburys local'],
+    ['Tesco', 'groceries', 'tescos', 'tesco express', 'tesco extra', 'tesco metro', 'tesco stores', 'tesco store', 'tesco pfs'],
+    ["Sainsbury's", 'groceries', 'sains', 'sainsburys', 'sainsbury', 'sainos', 'sainsburies', 'sainsbos', 'sainsburys local', 'js online grocery', 'sainsburys s/mkts', 'sainsburys smkt'],
     ['Asda', 'groceries', 'asdas'],
     ['Morrisons', 'groceries', 'morrys', 'morries', 'morrison', 'morrissons'],
     ['Aldi', 'groceries', 'aldis'],
@@ -107,7 +107,7 @@
     ['Toby Carvery', 'eating', 'toby', 'tobys'], ['Harvester', 'eating'], ['Zizzi', 'eating', 'zizzis'], ['Prezzo', 'eating'], ['Dishoom', 'eating'],
     ['Tim Hortons', 'eating', 'timmies'], ['Taco Bell', 'eating'], ['Krispy Kreme', 'eating'],
     ['Shell', 'transport'], ['BP', 'transport'], ['Esso', 'transport'], ['Texaco', 'transport'],
-    ['TfL', 'transport', 'oyster', 'tfl travel'], ['Trainline', 'transport', 'the trainline'], ['Uber', 'transport'], ['Bolt', 'transport'],
+    ['TfL', 'transport', 'oyster', 'tfl travel', 'tfl travel ch', 'tfl.gov.uk'], ['Trainline', 'transport', 'the trainline'], ['Uber', 'transport'], ['Bolt', 'transport'],
     ['National Express', 'transport'], ['Megabus', 'transport'], ['LNER', 'transport'], ['GWR', 'transport'], ['Avanti', 'transport', 'avanti west coast'],
     ['RingGo', 'transport', 'ringo', 'ring go'], ['PayByPhone', 'transport', 'pay by phone'], ['JustPark', 'transport', 'just park'],
     ['Halfords', 'transport'], ['Kwik Fit', 'transport', 'kwikfit'],
@@ -115,10 +115,10 @@
     ['OVO', 'bills', 'ovo energy'], ['Scottish Power', 'bills'], ['BT', 'bills', 'bt broadband'], ['Sky', 'bills'], ['Virgin Media', 'bills', 'virgin'],
     ['EE', 'bills'], ['Vodafone', 'bills'], ['O2', 'bills'], ['giffgaff', 'bills', 'giff gaff'], ['Thames Water', 'bills'], ['Severn Trent', 'bills'],
     ['TV Licence', 'bills', 'tv license', 'tv licensing'],
-    ['Netflix', 'subs'], ['Spotify', 'subs'], ['Disney+', 'subs', 'disney', 'disney plus', 'disneyplus'], ['Amazon Prime', 'subs', 'prime', 'prime video'],
+    ['Netflix', 'subs', 'netflix.com'], ['Spotify', 'subs', 'spotify uk', 'spotify p'], ['Disney+', 'subs', 'disney', 'disney plus', 'disneyplus'], ['Amazon Prime', 'subs', 'prime', 'prime video'],
     ['iCloud', 'subs', 'apple icloud'], ['YouTube Premium', 'subs', 'youtube'], ['Audible', 'subs'], ['NOW', 'subs', 'now tv', 'nowtv'],
     ['Xbox Game Pass', 'subs', 'game pass', 'gamepass'], ['PlayStation Plus', 'subs', 'ps plus', 'psplus'], ['ChatGPT', 'subs', 'chat gpt'],
-    ['Amazon', 'shopping', 'amzn', 'amazon uk', 'amazon.co.uk'], ['Argos', 'shopping'], ['Primark', 'shopping', 'primarni'], ['Next', 'shopping'],
+    ['Amazon', 'shopping', 'amzn', 'amazon uk', 'amazon.co.uk', 'amznmktplace', 'amzn mktp', 'amazon mktplace', 'amazon marketplace', 'amznmktp', 'amazon.co.uk*', 'amazon retail'], ['Argos', 'shopping'], ['Primark', 'shopping', 'primarni'], ['Next', 'shopping'],
     ['Zara', 'shopping'], ['H&M', 'shopping', 'h and m'], ['ASOS', 'shopping'], ['TK Maxx', 'shopping', 'tkmaxx', 'tk max', 'tkmax'],
     ['John Lewis', 'shopping', 'jlp', 'john lewis and partners'], ['Currys', 'shopping', 'currys pc world', 'pc world'], ['eBay', 'shopping'],
     ['Vinted', 'shopping'], ['Etsy', 'shopping'], ['Uniqlo', 'shopping'], ['JD Sports', 'shopping', 'jd'], ['Sports Direct', 'shopping'],
@@ -417,7 +417,19 @@
     return out;
   }
 
-  const api = { CATEGORIES, KEYWORDS, MERCHANTS, merchantForWord, editDistance, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
+  /** First known shop mentioned anywhere in a piece of text, e.g. a bank description. Returns {name, cat} or null. */
+  function findMerchant(text) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lw = words.map((w) => nk(w));
+    for (let i = 0; i < words.length; i++) {
+      for (const [parts, mi] of MERCH_PHRASE) if (parts.length > 1 && parts.every((p, j) => lw[i + j] === p)) return { name: MERCHANTS[mi][0], cat: MERCHANTS[mi][1] };
+      const mi = merchantForWord(words[i]);
+      if (mi >= 0) return { name: MERCHANTS[mi][0], cat: MERCHANTS[mi][1] };
+    }
+    return null;
+  }
+
+  const api = { CATEGORIES, KEYWORDS, MERCHANTS, findMerchant, merchantForWord, editDistance, parse, parseAmount, keywordCategory, normKey, titleCase, iso };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TallyParser = api;
 })(typeof window !== 'undefined' ? window : globalThis);
