@@ -58,6 +58,8 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (t.closest('[data-import]')) return startImport();
+  if ((b = t.closest('[data-log-income]'))) return logIncome(b.dataset.logIncome);
+  if ((b = t.closest('[data-snooze-income]'))) { S.paySnooze = Object.assign({}, S.paySnooze, { [b.dataset.snoozeIncome]: todayISO() }); save(); renderHome(); return toast("OK, you'll be asked again tomorrow"); }
   if (t.closest('[data-keep-examples]')) { S.exKeep = true; save(); renderHome(); return; }
   if ((b = t.closest('[data-default-who]'))) { S.defaultWho = b.dataset.defaultWho; save(); refresh(); return; }
   if ((b = t.closest('[data-unalias]'))) { const k = b.dataset.unalias, v = S.aliases[k]; delete S.aliases[k]; save(); refresh(); return toast(`Forgot “${k}”`, () => { S.aliases[k] = v; save(); refresh(); }); }

@@ -608,3 +608,9 @@ button { cursor: pointer; }
 .empty-card .btn { justify-self: start; display: inline-flex; align-items: center; text-decoration: none; margin-top: 4px; }
 .setbud { font-size: 14px; }
 .budnote { font-size: 12px; text-decoration: underline; color: var(--ink-2); }
+
+/* payday */
+.payday { background: color-mix(in srgb, var(--in) 14%, var(--surface)); }
+.inc-row { display: grid; }
+.inc-log { margin: 0 14px 14px; }
+.tx-amt small { display: block; text-align: right; }

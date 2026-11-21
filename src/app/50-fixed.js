@@ -4,6 +4,7 @@ function postFixed() {
   let n = 0;
   for (const f of S.fixed) {
     if (!f.active) continue;
+    if (f.cat === 'income' && !f.example) continue; // income is logged by hand on payday: the amount varies
     for (let ym = f.start, guard = 0; ym <= cur && guard < 36; ym = nextMonth(ym), guard++) {
       if (f.posted.includes(ym)) continue;
       const date = `${ym}-${String(Math.min(f.day, daysIn(ym))).padStart(2, '0')}`;
@@ -81,12 +82,13 @@ function editFixed(id, seed) {
   const noun = inc ? 'regular income' : 'fixed cost';
   const html = () => `<form class="form" data-form>
     <div class="field"><label for="fxDesc">Name</label><input class="input" id="fxDesc" value="${esc(d.desc)}" placeholder="${inc ? 'Salary, child benefit…' : 'Rent, Netflix, council tax…'}"></div>
-    <div class="row2"><div class="field"><label for="fxAmt">Amount (£)</label><input class="input" id="fxAmt" inputmode="decimal" value="${d.amt ? (d.amt / 100).toFixed(2) : ''}" placeholder="0.00"></div>
+    <div class="row2"><div class="field"><label for="fxAmt">${inc ? 'Usual amount (£)' : 'Amount (£)'}</label><input class="input" id="fxAmt" inputmode="decimal" value="${d.amt ? (d.amt / 100).toFixed(2) : ''}" placeholder="0.00"></div>
     <div class="field"><label for="fxDay">Day of month</label><select class="input" id="fxDay">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${d.day === i + 1 ? 'selected' : ''}>${ordinal(i + 1)}${i + 1 > 28 ? ' (or last day)' : ''}</option>`).join('')}</select></div></div>
     ${inc ? '' : `<div class="field"><span>Category</span>${catGrid(OUT_CATS, d.cat || TP.keywordCategory(TP.normKey(d.desc)) || 'bills')}</div>`}
     ${isPair() ? `<div class="field"><span>Whose</span><div class="segctl" role="group" aria-label="Whose">${S.people.concat('shared').map((w) =>
       `<button type="button" data-act="who" data-v="${esc(w)}" aria-pressed="${(d.who || 'shared') === w}">${esc(whoLabel(w))}</button>`).join('')}</div></div>` : ''}
-    ${!f ? `<label class="check"><input type="checkbox" id="fxPaid" checked> ${inc ? "Log this month's if it has already arrived" : "Log this month's payment if its day has passed"}</label>`
+    ${inc ? '<p class="hint">The amount can change each month. On payday you\'ll be asked what actually arrived, with this amount filled in.</p>' : ''}
+    ${inc && !f ? '' : !f ? `<label class="check"><input type="checkbox" id="fxPaid" checked> Log this month's payment if its day has passed</label>`
       : `<label class="check"><input type="checkbox" id="fxActive" ${d.active ? 'checked' : ''}> Active (untick to pause)</label>`}
     <div class="btns">${f ? '<button class="btn danger" type="button" data-act="del">Delete</button>' : ''}<button class="btn primary" type="submit">${f ? 'Save' : 'Add ' + noun}</button></div>
     ${f ? '<p class="hint">Changes apply from the next payment. Past entries stay as they were.</p>' : ''}
@@ -111,14 +113,14 @@ function editFixed(id, seed) {
       } else {
         const cur = monthOf(todayISO());
         const nf = Object.assign(d, { id: uid(), start: cur, posted: [], active: true });
-        if (!$('#fxPaid', body).checked) nf.posted.push(cur);
+        if (!inc && !$('#fxPaid', body).checked) nf.posted.push(cur);
         if (seed && seed.fromTxn) { nf.posted = [cur]; const tx = S.txns.find((x) => x.id === seed.fromTxn); if (tx) tx.fixedId = nf.id; delete nf.fromTxn; }
         S.fixed.push(nf);
       }
       closeSheet();
       const n = postFixed();
       save(); refresh();
-      toast(f ? `${inc ? 'Regular income' : 'Fixed cost'} saved` : `${name} ${inc ? 'arrives' : 'repeats'} on the ${ordinal(d.day)} each month${n ? ' · logged this month' : ''}`);
+      toast(f ? `${inc ? 'Regular income' : 'Fixed cost'} saved` : inc ? `You'll be asked for ${name.toLowerCase()} on the ${ordinal(d.day)} each month` : `${name} repeats on the ${ordinal(d.day)} each month${n ? ' · logged this month' : ''}`);
     }
   }, id ? null : '#fxDesc');
 }

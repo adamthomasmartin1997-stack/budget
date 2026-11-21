@@ -13,6 +13,7 @@ function renderHome() {
     exNote = `<p class="exline">Showing <span class="tag">example</span> data. <button type="button" class="link" data-clear-examples>Clear it</button></p>`;
   }
   $('#homeBody').innerHTML = `<div class="stack">
+    ${paydayCards()}
     ${exNote}
     ${monthCard(ym, { tiles: true })}
     <section><div class="sec-h"><h2>Latest</h2><a href="#activity">See all</a></div>
