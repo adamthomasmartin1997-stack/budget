@@ -73,7 +73,8 @@ function renderBudget() {
   el.innerHTML = `<div class="stack">${monthNav()}
     ${monthCard(ui.month)}
     ${goalsSection()}
-    <section><div class="sec-h"><h2>By category</h2><span class="hint">Tap to set a budget</span></div>
+    ${rows.length ? '' : `<div class="card empty-card"><b>No budgets yet</b><span>Pick a category below and set how much you want to spend on it each month, for example Groceries £400. The month card on Home then shows what's left and how much a day you can spend.</span></div>`}
+    <section ${rows.length ? '' : 'hidden'}><div class="sec-h"><h2>By category</h2><span class="hint">Tap to set a budget</span></div>
     <div class="card"><div class="cats">${rows.map((r) => {
       const over = r.b && r.v > r.b;
       const w = r.b ? Math.min(100, (r.v / r.b) * 100) : r.v ? 100 : 0;
@@ -82,7 +83,7 @@ function renderBudget() {
         <span class="catval"><b class="${over ? 'neg' : ''}">${money(r.v)}</b> <span class="muted">${r.b ? `of ${moneyR(r.b)}` : 'no budget'}</span></span>
         <span class="bar"><i style="width:${w.toFixed(1)}%"></i></span></button>`;
     }).join('')}</div></div></section>
-    ${rest.length ? `<section><div class="sec-h"><h2>No budget yet</h2></div><div class="pills" style="flex-wrap:wrap">${rest.map((c) =>
+    ${rest.length ? `<section><div class="sec-h"><h2>${rows.length ? 'No budget yet' : 'Set a budget'}</h2></div><div class="pills" style="flex-wrap:wrap">${rest.map((c) =>
       `<button type="button" class="pill" data-budget="${c.id}">${esc(c.name)}</button>`).join('')}</div></section>` : ''}
   </div>`;
 }

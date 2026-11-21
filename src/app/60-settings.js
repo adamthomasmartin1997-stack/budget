@@ -65,7 +65,7 @@ function renderPrefs() {
       <button type="button" class="btn primary" data-import>Import a bank statement</button></div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
-      <p class="hint">Entries are stored on this device only. Export a backup now and then. To combine two phones, export on one and import on the other; matching entries are merged, not duplicated.</p>
+      <p class="hint">${SYNC_ON && SY.code ? 'Your household syncs between both phones. A backup now and then is still a good idea.' : 'Entries are stored on this device only. Export a backup now and then.'} Importing a backup merges it: matching entries are not duplicated.</p>
       <div class="btns">${window.TALLY_PWA ? `<button type="button" class="btn" data-export>Export backup</button>` : ""}<button type="button" class="btn" data-copy>Copy backup</button>
       <label class="btn" style="display:grid;place-items:center">Import<input type="file" accept="application/json,.json" id="importFile" hidden></label></div>
     </div></section>

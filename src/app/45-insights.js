@@ -241,6 +241,14 @@ function renderInsights() {
       <div class="legend">${avg ? `<span>Average full month <b>${moneyR(avg)}</b></span>` : ''}${vals[maxI] ? `<span>Biggest <b>${esc(names[maxI])}, ${moneyR(vals[maxI])}</b></span>` : ''}</div></div></section>`;
   }
 
+  if (!list.length && !saveRange(from, to, who).length && !(who === 'all' && inRange(from, to).length)) {
+    const anything = S.txns.some((x) => x.type !== 'in');
+    el.innerHTML = `<div class="stack">${recapCards()}${periodCtl}${nav}${tabs}
+      <div class="card empty-card"><b>${anything ? `Nothing for ${esc(who === 'all' ? 'anyone' : whoLabel(who))} in ${esc(periodName === 'the week' ? 'this week' : periodName)}` : 'Your insights start here'}</b>
+      <span>${anything ? 'Try another week, month or person.' : 'Log a few costs and this fills in: where your money goes, who spends what, a spending calendar, top places and how this month compares with last.'}</span>
+      ${anything ? '' : '<a class="btn primary" href="#home">Log your first cost</a>'}</div></div>`;
+    return;
+  }
   el.innerHTML = `<div class="stack">${recapCards()}${periodCtl}${nav}${tabs}${hero}
     ${pair && who === 'all' ? whoSplit(all) : ''}
     ${chart}

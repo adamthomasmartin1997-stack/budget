@@ -31,6 +31,7 @@ const bState = await B.p.evaluate(() => JSON.parse(localStorage.getItem('tally.v
 check(bState.people.join() === 'Adam,Sam', 'phone B gets the names from phone A', bState.people.join());
 check((await real(B.p)).some((t) => t.desc === 'Tesco' && t.amt === 2340), "phone B sees A's Tesco entry");
 check(!bState.txns.some((t) => t.example), 'example data cleared on phone B');
+check(Object.keys(bState.budgets).length === 0, "phone B does not bring placeholder budgets into the household", JSON.stringify(bState.budgets));
 
 // Both log at the same time, then sync
 await B.p.goto(base + '/#home'); await B.p.waitForTimeout(200);

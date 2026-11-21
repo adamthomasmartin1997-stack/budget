@@ -52,9 +52,9 @@ function renderIncome() {
     <section><div class="sec-h"><h2>Received in ${esc(monthName(ym))}</h2></div>
       ${list.length ? `<ul class="list">${list.map((x) => txRow(x, true)).join('')}</ul>` : `<p class="empty">Nothing received yet. One-off money in can be typed in the box, like <b>+50 refund</b>.</p>`}</section>
 
-    <section><div class="sec-h"><h2>Last 12 months</h2><span class="hint">Tap a bar</span></div><div class="card form">${barChart({ values: vals, color: 'in', maxBar: 18,
+    ${vals.some((v) => v > 0) ? `    <section><div class="sec-h"><h2>Last 12 months</h2><span class="hint">Tap a bar</span></div><div class="card form">${barChart({ values: vals, color: 'in', maxBar: 18,
       ticks: [0, 3, 6, 9, 11], labels: names, tips: vals.map((v, i) => `${names[i]} · ${money(v)}`), ref: avg, refLabel: avg ? `avg ${moneyR(avg)}` : '',
       aria: `Money in per month, last 12 months` })}
-      <div class="legend">${avg ? `<span>Average month <b>${moneyR(avg)}</b></span>` : ''}<span>Last 12 months <b>${moneyR(vals.reduce((a, b) => a + b, 0))}</b></span></div></div></section>
+      <div class="legend">${avg ? `<span>Average month <b>${moneyR(avg)}</b></span>` : ''}<span>Last 12 months <b>${moneyR(vals.reduce((a, b) => a + b, 0))}</b></span></div></div></section>` : ''}
   </div>`;
 }

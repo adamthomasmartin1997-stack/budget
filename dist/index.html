@@ -624,6 +624,13 @@ button { cursor: pointer; }
 .imp-foot .btn { min-width: 0; }
 .btn:disabled { opacity: .5; }
 
+.empty-card { display: grid; gap: 8px; text-align: left; }
+.empty-card b { font-family: var(--f-display); font-size: 17px; }
+.empty-card span { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.empty-card .btn { justify-self: start; display: inline-flex; align-items: center; text-decoration: none; margin-top: 4px; }
+.setbud { font-size: 14px; }
+.budnote { font-size: 12px; text-decoration: underline; color: var(--ink-2); }
+
 </style>
 </head>
 <body>
@@ -1931,17 +1938,22 @@ function monthCard(ym, opts) {
   const isCur = ym === monthOf(todayISO());
   const dim = new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate();
   const daysLeft = isCur ? dim - now.getDate() + 1 : 0;
-  const left = budget - s.out;
-  const pct = budget ? Math.min(100, (s.out / budget) * 100) : 0;
+  // Budgets only cover the categories you set them for, so compare against spending in those categories.
+  const budgetedIds = Object.keys(S.budgets).filter((k) => S.budgets[k] > 0);
+  const spentB = budgetedIds.reduce((a, k) => a + (s.byCat[k] || 0), 0);
+  const partial = budgetedIds.length > 0 && spentB < s.out;
+  const left = budget - spentB;
+  const pct = budget ? Math.min(100, (spentB / budget) * 100) : 0;
   const pace = isCur ? ((now.getDate() - 0.5) / dim) * 100 : 100;
-  const state = !budget ? '' : s.out > budget ? 'over' : pct > pace + 8 ? 'warn' : '';
+  const state = !budget ? '' : spentB > budget ? 'over' : pct > pace + 8 ? 'warn' : '';
   const [pounds, pence] = money(s.out).split('.');
   const net = s.in - s.out - s.save;
   return `<div class="card month">
     <div class="month-top"><span class="eyebrow">${esc(monthName(ym))} spending</span><span class="muted" style="font-size:13px">${isCur ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} left` : esc(monthName(ym, true))}</span></div>
     <div class="big">${esc(pounds)}<small>.${esc(pence)}</small></div>
+    ${!budget && isCur ? '<a class="link setbud" href="#budget">Set a monthly budget →</a>' : ''}
     ${budget ? `<div class="bar ${state}" role="img" aria-label="${Math.round(pct)}% of monthly budget used"><i style="width:${pct.toFixed(1)}%"></i>${isCur ? `<span class="pace" style="left:${pace.toFixed(1)}%"></span>` : ''}</div>
-    <div class="month-row"><span>${left >= 0 ? `<b>${moneyR(left)}</b> left of ${moneyR(budget)}` : `<b class="neg">${moneyR(-left)}</b> over ${moneyR(budget)} budget`}</span>
+    <div class="month-row"><span>${left >= 0 ? `<b>${moneyR(left)}</b> left of ${moneyR(budget)}` : `<b class="neg">${moneyR(-left)}</b> over ${moneyR(budget)}`}${partial ? ` <a class="muted budnote" href="#budget">in budgeted categories</a>` : ' budget'}</span>
       ${isCur && left > 0 ? `<span class="muted">about <b>${moneyR(Math.floor(left / daysLeft / 100) * 100)}</b> a day</span>` : ''}</div>` : ''}
     <div class="month-foot">${s.in ? `<span>In <b class="pos">${moneyR(s.in)}</b></span>` : ''}${s.save ? `<span>Saved &amp; invested <b class="sv">${moneyR(s.save)}</b></span>` : ''}${s.in ? `<span>Left over <b class="${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '' : '−'}${moneyR(Math.abs(net))}</b></span>` : ''}
       ${isPair() && !opts.tiles ? S.people.concat('shared').map((w) => `<span>${esc(whoLabel(w))} <b>${moneyR(s.byWho[w] || 0)}</b></span>`).join('') : ''}</div>
@@ -2025,7 +2037,8 @@ function renderBudget() {
   el.innerHTML = `<div class="stack">${monthNav()}
     ${monthCard(ui.month)}
     ${goalsSection()}
-    <section><div class="sec-h"><h2>By category</h2><span class="hint">Tap to set a budget</span></div>
+    ${rows.length ? '' : `<div class="card empty-card"><b>No budgets yet</b><span>Pick a category below and set how much you want to spend on it each month, for example Groceries £400. The month card on Home then shows what's left and how much a day you can spend.</span></div>`}
+    <section ${rows.length ? '' : 'hidden'}><div class="sec-h"><h2>By category</h2><span class="hint">Tap to set a budget</span></div>
     <div class="card"><div class="cats">${rows.map((r) => {
       const over = r.b && r.v > r.b;
       const w = r.b ? Math.min(100, (r.v / r.b) * 100) : r.v ? 100 : 0;
@@ -2034,7 +2047,7 @@ function renderBudget() {
         <span class="catval"><b class="${over ? 'neg' : ''}">${money(r.v)}</b> <span class="muted">${r.b ? `of ${moneyR(r.b)}` : 'no budget'}</span></span>
         <span class="bar"><i style="width:${w.toFixed(1)}%"></i></span></button>`;
     }).join('')}</div></div></section>
-    ${rest.length ? `<section><div class="sec-h"><h2>No budget yet</h2></div><div class="pills" style="flex-wrap:wrap">${rest.map((c) =>
+    ${rest.length ? `<section><div class="sec-h"><h2>${rows.length ? 'No budget yet' : 'Set a budget'}</h2></div><div class="pills" style="flex-wrap:wrap">${rest.map((c) =>
       `<button type="button" class="pill" data-budget="${c.id}">${esc(c.name)}</button>`).join('')}</div></section>` : ''}
   </div>`;
 }
@@ -2367,6 +2380,14 @@ function renderInsights() {
       <div class="legend">${avg ? `<span>Average full month <b>${moneyR(avg)}</b></span>` : ''}${vals[maxI] ? `<span>Biggest <b>${esc(names[maxI])}, ${moneyR(vals[maxI])}</b></span>` : ''}</div></div></section>`;
   }
 
+  if (!list.length && !saveRange(from, to, who).length && !(who === 'all' && inRange(from, to).length)) {
+    const anything = S.txns.some((x) => x.type !== 'in');
+    el.innerHTML = `<div class="stack">${recapCards()}${periodCtl}${nav}${tabs}
+      <div class="card empty-card"><b>${anything ? `Nothing for ${esc(who === 'all' ? 'anyone' : whoLabel(who))} in ${esc(periodName === 'the week' ? 'this week' : periodName)}` : 'Your insights start here'}</b>
+      <span>${anything ? 'Try another week, month or person.' : 'Log a few costs and this fills in: where your money goes, who spends what, a spending calendar, top places and how this month compares with last.'}</span>
+      ${anything ? '' : '<a class="btn primary" href="#home">Log your first cost</a>'}</div></div>`;
+    return;
+  }
   el.innerHTML = `<div class="stack">${recapCards()}${periodCtl}${nav}${tabs}${hero}
     ${pair && who === 'all' ? whoSplit(all) : ''}
     ${chart}
@@ -2579,10 +2600,10 @@ function renderIncome() {
     <section><div class="sec-h"><h2>Received in ${esc(monthName(ym))}</h2></div>
       ${list.length ? `<ul class="list">${list.map((x) => txRow(x, true)).join('')}</ul>` : `<p class="empty">Nothing received yet. One-off money in can be typed in the box, like <b>+50 refund</b>.</p>`}</section>
 
-    <section><div class="sec-h"><h2>Last 12 months</h2><span class="hint">Tap a bar</span></div><div class="card form">${barChart({ values: vals, color: 'in', maxBar: 18,
+    ${vals.some((v) => v > 0) ? `    <section><div class="sec-h"><h2>Last 12 months</h2><span class="hint">Tap a bar</span></div><div class="card form">${barChart({ values: vals, color: 'in', maxBar: 18,
       ticks: [0, 3, 6, 9, 11], labels: names, tips: vals.map((v, i) => `${names[i]} · ${money(v)}`), ref: avg, refLabel: avg ? `avg ${moneyR(avg)}` : '',
       aria: `Money in per month, last 12 months` })}
-      <div class="legend">${avg ? `<span>Average month <b>${moneyR(avg)}</b></span>` : ''}<span>Last 12 months <b>${moneyR(vals.reduce((a, b) => a + b, 0))}</b></span></div></div></section>
+      <div class="legend">${avg ? `<span>Average month <b>${moneyR(avg)}</b></span>` : ''}<span>Last 12 months <b>${moneyR(vals.reduce((a, b) => a + b, 0))}</b></span></div></div></section>` : ''}
   </div>`;
 }
 
@@ -2800,7 +2821,7 @@ function renderPrefs() {
       <button type="button" class="btn primary" data-import>Import a bank statement</button></div></section>
 
     <section><div class="sec-h"><h2>Backup</h2></div><div class="card form">
-      <p class="hint">Entries are stored on this device only. Export a backup now and then. To combine two phones, export on one and import on the other; matching entries are merged, not duplicated.</p>
+      <p class="hint">${SYNC_ON && SY.code ? 'Your household syncs between both phones. A backup now and then is still a good idea.' : 'Entries are stored on this device only. Export a backup now and then.'} Importing a backup merges it: matching entries are not duplicated.</p>
       <div class="btns">${window.TALLY_PWA ? `<button type="button" class="btn" data-export>Export backup</button>` : ""}<button type="button" class="btn" data-copy>Copy backup</button>
       <label class="btn" style="display:grid;place-items:center">Import<input type="file" accept="application/json,.json" id="importFile" hidden></label></div>
     </div></section>
@@ -2951,7 +2972,7 @@ document.addEventListener('submit', (e) => {
     e.preventDefault();
     const n1 = $('#obName1').value.trim();
     if (!n1) { $('#obName1').focus(); return; }
-    if (!$('#obExamples').checked) { S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example); }
+    if (!$('#obExamples').checked) { S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example); S.budgets = {}; } // a real start has no made-up budgets
     savePeople(n1, $('#obName2').value);
     $('#onboard').hidden = true;
     qa.input.focus();
@@ -3077,9 +3098,12 @@ async function startHousehold() {
 async function joinHousehold(code) {
   const c = normCode(code);
   if (c.replace(/-/g, '').length < 16) { toast('That code looks too short. Check it and try again.'); return false; }
-  const before = SY;
+  const before = SY, budgetsBefore = S.budgets;
+  // A joining phone takes the household's budgets; its own placeholders must not be pushed into the household.
+  S.budgets = {};
   SY = { code: c, version: 0, base: {} };
   const ok = await syncNow({ mode: 'join', pullOnly: true });
+  if (!ok) S.budgets = budgetsBefore;
   if (!ok) { const err = SY.error; SY = before; saveSync(); toast(err || 'Could not join'); renderView(); return false; }
   S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example);
   S.setup = true;

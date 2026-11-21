@@ -90,7 +90,7 @@ document.addEventListener('submit', (e) => {
     e.preventDefault();
     const n1 = $('#obName1').value.trim();
     if (!n1) { $('#obName1').focus(); return; }
-    if (!$('#obExamples').checked) { S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example); }
+    if (!$('#obExamples').checked) { S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example); S.budgets = {}; } // a real start has no made-up budgets
     savePeople(n1, $('#obName2').value);
     $('#onboard').hidden = true;
     qa.input.focus();

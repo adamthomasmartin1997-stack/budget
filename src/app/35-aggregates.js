@@ -47,17 +47,22 @@ function monthCard(ym, opts) {
   const isCur = ym === monthOf(todayISO());
   const dim = new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate();
   const daysLeft = isCur ? dim - now.getDate() + 1 : 0;
-  const left = budget - s.out;
-  const pct = budget ? Math.min(100, (s.out / budget) * 100) : 0;
+  // Budgets only cover the categories you set them for, so compare against spending in those categories.
+  const budgetedIds = Object.keys(S.budgets).filter((k) => S.budgets[k] > 0);
+  const spentB = budgetedIds.reduce((a, k) => a + (s.byCat[k] || 0), 0);
+  const partial = budgetedIds.length > 0 && spentB < s.out;
+  const left = budget - spentB;
+  const pct = budget ? Math.min(100, (spentB / budget) * 100) : 0;
   const pace = isCur ? ((now.getDate() - 0.5) / dim) * 100 : 100;
-  const state = !budget ? '' : s.out > budget ? 'over' : pct > pace + 8 ? 'warn' : '';
+  const state = !budget ? '' : spentB > budget ? 'over' : pct > pace + 8 ? 'warn' : '';
   const [pounds, pence] = money(s.out).split('.');
   const net = s.in - s.out - s.save;
   return `<div class="card month">
     <div class="month-top"><span class="eyebrow">${esc(monthName(ym))} spending</span><span class="muted" style="font-size:13px">${isCur ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} left` : esc(monthName(ym, true))}</span></div>
     <div class="big">${esc(pounds)}<small>.${esc(pence)}</small></div>
+    ${!budget && isCur ? '<a class="link setbud" href="#budget">Set a monthly budget →</a>' : ''}
     ${budget ? `<div class="bar ${state}" role="img" aria-label="${Math.round(pct)}% of monthly budget used"><i style="width:${pct.toFixed(1)}%"></i>${isCur ? `<span class="pace" style="left:${pace.toFixed(1)}%"></span>` : ''}</div>
-    <div class="month-row"><span>${left >= 0 ? `<b>${moneyR(left)}</b> left of ${moneyR(budget)}` : `<b class="neg">${moneyR(-left)}</b> over ${moneyR(budget)} budget`}</span>
+    <div class="month-row"><span>${left >= 0 ? `<b>${moneyR(left)}</b> left of ${moneyR(budget)}` : `<b class="neg">${moneyR(-left)}</b> over ${moneyR(budget)}`}${partial ? ` <a class="muted budnote" href="#budget">in budgeted categories</a>` : ' budget'}</span>
       ${isCur && left > 0 ? `<span class="muted">about <b>${moneyR(Math.floor(left / daysLeft / 100) * 100)}</b> a day</span>` : ''}</div>` : ''}
     <div class="month-foot">${s.in ? `<span>In <b class="pos">${moneyR(s.in)}</b></span>` : ''}${s.save ? `<span>Saved &amp; invested <b class="sv">${moneyR(s.save)}</b></span>` : ''}${s.in ? `<span>Left over <b class="${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '' : '−'}${moneyR(Math.abs(net))}</b></span>` : ''}
       ${isPair() && !opts.tiles ? S.people.concat('shared').map((w) => `<span>${esc(whoLabel(w))} <b>${moneyR(s.byWho[w] || 0)}</b></span>`).join('') : ''}</div>

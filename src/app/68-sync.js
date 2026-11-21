@@ -109,9 +109,12 @@ async function startHousehold() {
 async function joinHousehold(code) {
   const c = normCode(code);
   if (c.replace(/-/g, '').length < 16) { toast('That code looks too short. Check it and try again.'); return false; }
-  const before = SY;
+  const before = SY, budgetsBefore = S.budgets;
+  // A joining phone takes the household's budgets; its own placeholders must not be pushed into the household.
+  S.budgets = {};
   SY = { code: c, version: 0, base: {} };
   const ok = await syncNow({ mode: 'join', pullOnly: true });
+  if (!ok) S.budgets = budgetsBefore;
   if (!ok) { const err = SY.error; SY = before; saveSync(); toast(err || 'Could not join'); renderView(); return false; }
   S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example);
   S.setup = true;

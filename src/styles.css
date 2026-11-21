@@ -601,3 +601,10 @@ button { cursor: pointer; }
   padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: var(--div-border); font-size: 14px; font-weight: 600; }
 .imp-foot .btn { min-width: 0; }
 .btn:disabled { opacity: .5; }
+
+.empty-card { display: grid; gap: 8px; text-align: left; }
+.empty-card b { font-family: var(--f-display); font-size: 17px; }
+.empty-card span { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.empty-card .btn { justify-self: start; display: inline-flex; align-items: center; text-decoration: none; margin-top: 4px; }
+.setbud { font-size: 14px; }
+.budnote { font-size: 12px; text-decoration: underline; color: var(--ink-2); }
