@@ -614,3 +614,7 @@ button { cursor: pointer; }
 .inc-row { display: grid; }
 .inc-log { margin: 0 14px 14px; }
 .tx-amt small { display: block; text-align: right; }
+
+.payrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 8px; align-items: center; }
+.payname { grid-column: 1 / -1; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.payrow .input { padding: 0 10px; min-width: 0; }

@@ -621,6 +621,10 @@ button { cursor: pointer; }
 .inc-log { margin: 0 14px 14px; }
 .tx-amt small { display: block; text-align: right; }
 
+.payrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 8px; align-items: center; }
+.payname { grid-column: 1 / -1; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.payrow .input { padding: 0 10px; min-width: 0; }
+
 </style>
 <div class="app" id="app">
   <header class="top">
@@ -681,6 +685,14 @@ button { cursor: pointer; }
       <div class="row2"><input class="input" id="obName1" placeholder="Your name" autocomplete="given-name" aria-label="Your name" required>
       <input class="input" id="obName2" placeholder="Partner (optional)" aria-label="Partner's name (optional)"></div>
       <p class="hint">With a partner, every cost can be yours, theirs or joint, and Insights shows each of you separately. You can change names later in Settings.</p></fieldset>
+    <fieldset class="ob-set"><legend>When are you paid?</legend>
+      <div class="payrow" id="obPayRow1"><span class="payname" id="obPayName1">You</span>
+        <select class="input" id="obPay1" aria-label="Payday"><option value="">No payday</option><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5">5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th</option><option value="10">10th</option><option value="11">11th</option><option value="12">12th</option><option value="13">13th</option><option value="14">14th</option><option value="15">15th</option><option value="16">16th</option><option value="17">17th</option><option value="18">18th</option><option value="19">19th</option><option value="20">20th</option><option value="21">21st</option><option value="22">22nd</option><option value="23">23rd</option><option value="24">24th</option><option value="25">25th</option><option value="26">26th</option><option value="27">27th</option><option value="28">28th</option><option value="29">29th</option><option value="30">30th</option><option value="31">31st</option><option value="last">Last working day</option></select>
+        <input class="input" id="obAmt1" inputmode="decimal" placeholder="Usual £" aria-label="Usual amount, optional"></div>
+      <div class="payrow" id="obPayRow2" hidden><span class="payname" id="obPayName2">Partner</span>
+        <select class="input" id="obPay2" aria-label="Payday"><option value="">No payday</option><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5">5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th</option><option value="10">10th</option><option value="11">11th</option><option value="12">12th</option><option value="13">13th</option><option value="14">14th</option><option value="15">15th</option><option value="16">16th</option><option value="17">17th</option><option value="18">18th</option><option value="19">19th</option><option value="20">20th</option><option value="21">21st</option><option value="22">22nd</option><option value="23">23rd</option><option value="24">24th</option><option value="25">25th</option><option value="26">26th</option><option value="27">27th</option><option value="28">28th</option><option value="29">29th</option><option value="30">30th</option><option value="31">31st</option><option value="last">Last working day</option></select>
+        <input class="input" id="obAmt2" inputmode="decimal" placeholder="Usual £" aria-label="Usual amount, optional"></div>
+      <p class="hint">Optional. On each payday the app reminds you to log what arrived, so the amount can be different every month. A payday on a weekend moves to the Friday before.</p></fieldset>
     <div class="ob-join" id="obJoin" hidden>
       <p class="hint"><b>Joining your partner?</b> Paste the household code from their phone, or open their invite link on this phone.</p>
       <div class="row2"><input class="input" id="obCode" placeholder="Household code" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Household code">
@@ -2493,12 +2505,12 @@ function editFixed(id, seed) {
   const noun = inc ? 'regular income' : 'fixed cost';
   const html = () => `<form class="form" data-form>
     <div class="field"><label for="fxDesc">Name</label><input class="input" id="fxDesc" value="${esc(d.desc)}" placeholder="${inc ? 'Salary, child benefit…' : 'Rent, Netflix, council tax…'}"></div>
-    <div class="row2"><div class="field"><label for="fxAmt">${inc ? 'Usual amount (£)' : 'Amount (£)'}</label><input class="input" id="fxAmt" inputmode="decimal" value="${d.amt ? (d.amt / 100).toFixed(2) : ''}" placeholder="0.00"></div>
-    <div class="field"><label for="fxDay">Day of month</label><select class="input" id="fxDay">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${d.day === i + 1 ? 'selected' : ''}>${ordinal(i + 1)}${i + 1 > 28 ? ' (or last day)' : ''}</option>`).join('')}</select></div></div>
+    <div class="row2"><div class="field"><label for="fxAmt">${inc ? 'Usual amount (£, optional)' : 'Amount (£)'}</label><input class="input" id="fxAmt" inputmode="decimal" value="${d.amt ? (d.amt / 100).toFixed(2) : ''}" placeholder="0.00"></div>
+    <div class="field"><label for="fxDay">${inc ? 'Payday' : 'Day of month'}</label><select class="input" id="fxDay">${Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}" ${+d.day === i + 1 ? 'selected' : ''}>${ordinal(i + 1)}${i + 1 > 28 ? ' (or last day)' : ''}</option>`).join('')}${inc ? `<option value="last" ${d.day === 'last' ? 'selected' : ''}>Last working day</option>` : ''}</select></div></div>
     ${inc ? '' : `<div class="field"><span>Category</span>${catGrid(OUT_CATS, d.cat || TP.keywordCategory(TP.normKey(d.desc)) || 'bills')}</div>`}
     ${isPair() ? `<div class="field"><span>Whose</span><div class="segctl" role="group" aria-label="Whose">${S.people.concat('shared').map((w) =>
       `<button type="button" data-act="who" data-v="${esc(w)}" aria-pressed="${(d.who || 'shared') === w}">${esc(whoLabel(w))}</button>`).join('')}</div></div>` : ''}
-    ${inc ? '<p class="hint">The amount can change each month. On payday you\'ll be asked what actually arrived, with this amount filled in.</p>' : ''}
+    ${inc ? '<p class="hint">The amount can change each month, so it never logs itself. On payday Home asks what actually arrived. A payday on a weekend moves to the Friday before.</p>' : ''}
     ${inc && !f ? '' : !f ? `<label class="check"><input type="checkbox" id="fxPaid" checked> Log this month's payment if its day has passed</label>`
       : `<label class="check"><input type="checkbox" id="fxActive" ${d.active ? 'checked' : ''}> Active (untick to pause)</label>`}
     <div class="btns">${f ? '<button class="btn danger" type="button" data-act="del">Delete</button>' : ''}<button class="btn primary" type="submit">${f ? 'Save' : 'Add ' + noun}</button></div>
@@ -2514,8 +2526,8 @@ function editFixed(id, seed) {
       const a = TP.parseAmount($('#fxAmt', body).value.replace(/\s/g, ''));
       const name = TP.titleCase($('#fxDesc', body).value.trim());
       if (!name) return $('#fxDesc', body).focus();
-      if (!a) return $('#fxAmt', body).focus();
-      d.desc = name; d.amt = a.pence; d.day = +$('#fxDay', body).value;
+      if (!a && !(inc && !$('#fxAmt', body).value.trim())) return $('#fxAmt', body).focus(); // a usual amount is optional for income
+      d.desc = name; d.amt = a ? a.pence : 0; d.day = $('#fxDay', body).value === 'last' ? 'last' : +$('#fxDay', body).value;
       d.cat = d.cat || TP.keywordCategory(TP.normKey(name)) || 'bills';
       if (!isPair()) d.who = null;
       if (f) {
@@ -2531,7 +2543,7 @@ function editFixed(id, seed) {
       closeSheet();
       const n = postFixed();
       save(); refresh();
-      toast(f ? `${inc ? 'Regular income' : 'Fixed cost'} saved` : inc ? `You'll be asked for ${name.toLowerCase()} on the ${ordinal(d.day)} each month` : `${name} repeats on the ${ordinal(d.day)} each month${n ? ' · logged this month' : ''}`);
+      toast(f ? `${inc ? 'Regular income' : 'Fixed cost'} saved` : inc ? `You'll be reminded on ${payDayText(d)} each month` : `${name} repeats on the ${ordinal(d.day)} each month${n ? ' · logged this month' : ''}`);
     }
   }, id ? null : '#fxDesc');
 }
@@ -2545,7 +2557,7 @@ function renderIncome() {
   const list = inRange(from, to).sort(sortTx);
   const got = total(list);
   const prevSame = total(inRange(pm + '-01', isCur ? `${pm}-${String(Math.min(+t.slice(8), daysIn(pm))).padStart(2, '0')}` : `${pm}-${daysIn(pm)}`));
-  const regular = S.fixed.filter((f) => f.cat === 'income').sort((a, b) => a.day - b.day);
+  const regular = S.fixed.filter((f) => f.cat === 'income').sort((a, b) => (a.day === 'last' ? 32 : +a.day) - (b.day === 'last' ? 32 : +b.day));
   const expected = isCur ? regular.filter((f) => f.active && !receivedTxn(f, ym)) : [];
   const spent = total(outRange(from, to, 'all')), saved = total(saveRange(from, to, 'all'));
   const left = got - spent - saved;
@@ -2564,9 +2576,9 @@ function renderIncome() {
     const due = f.active && !got && days <= 0;
     const status = !f.active ? 'Paused' : got ? `Received ${shortDate(got.date)}` : days === 0 ? 'Payday today' : days < 0 ? 'Payday has passed' : days === 1 ? 'Payday tomorrow' : `Payday in ${days} days`;
     return `<li class="inc-row"><button type="button" class="fx${got ? ' paid' : ''}${f.active ? '' : ' paused'}" data-fixed="${f.id}">
-      <span class="fx-day"><b>${f.day}</b><small>${ordinal(f.day).slice(-2)}</small></span>
+      <span class="fx-day">${payDayBox(f)}</span>
       <span class="tx-main"><b>${esc(f.desc)}${f.example ? '<span class="tag">example</span>' : ''}</b><small>${isPair() ? esc(whoLabel(f.who || 'shared')) + ' · ' : ''}<span class="status ${got ? 'paid' : due ? 'due' : ''}">${esc(status)}</span></small></span>
-      <span class="tx-amt in">${got ? '+' + money(got.amt) : `<small>usually</small>${moneyR(usualAmount(f))}`}</span></button>
+      <span class="tx-amt in">${got ? '+' + money(got.amt) : usualAmount(f) ? `<small>usually</small>${moneyR(usualAmount(f))}` : ''}</span></button>
       ${due ? `<button type="button" class="btn primary inc-log" data-log-income="${f.id}">Log this month's amount</button>` : ''}</li>`;
   };
 
@@ -2574,7 +2586,7 @@ function renderIncome() {
     <div class="card hero"><span class="eyebrow">Money in · ${esc(monthName(ym))}</span>
       <div class="big pos">${esc(money(got).split('.')[0])}<small>.${esc(money(got).split('.')[1])}</small></div>
       ${prevSame ? `<div class="sub">${Math.abs(got - prevSame) < 100 ? 'About the same as' : `<b>${moneyR(Math.abs(got - prevSame))}</b> ${got > prevSame ? 'more' : 'less'} than`} by ${esc(isCur ? `this point in ${monthName(pm)}` : `the end of ${monthName(pm)}`)}</div>` : ''}
-      ${expected.length ? `<div class="sub">Still to come: about <b>${moneyR(expected.reduce((a, f) => a + usualAmount(f), 0))}</b> from ${expected.map((f) => `${esc(f.desc)}${isPair() && f.who && f.who !== 'shared' ? ` (${esc(f.who)})` : ''} on the ${ordinal(f.day)}`).join(', ')}</div>` : ''}
+      ${expected.length ? `<div class="sub">Still to come: ${expected.some((f) => usualAmount(f)) ? `about <b>${moneyR(expected.reduce((a, f) => a + usualAmount(f), 0))}</b> from ` : ''}${expected.map((f) => `${esc(f.desc)}${isPair() && f.who && f.who !== 'shared' ? ` (${esc(f.who)})` : ''} on ${esc(shortDate(paydayOf(f, ym)))}`).join(', ')}</div>` : ''}
       ${isPair() && got ? `<div class="legend">${S.people.concat('shared').map((w) => `<span><i class="sw ${whoClass(w)}"></i>${esc(whoLabel(w))} <b>${moneyR(total(list.filter((x) => whoOf(x) === w)))}</b></span>`).join('')}</div>` : ''}
     </div>
 
@@ -2603,7 +2615,15 @@ function renderIncome() {
 // ---------- Payday ----------
 // Regular income never logs itself, because the real amount changes from month to month. On payday the app asks
 // for the actual figure. A salary typed in by hand or imported from a statement counts as received.
-const paydayOf = (f, ym) => `${ym}-${String(Math.min(f.day, daysIn(ym))).padStart(2, '0')}`;
+/** The actual payday in a month. "last" is the last working day; a payday on a weekend moves to the Friday before, as UK employers do. */
+function paydayOf(f, ym) {
+  const day = f.day === 'last' ? daysIn(ym) : Math.min(+f.day, daysIn(ym));
+  const d = fromISO(`${ym}-${String(day).padStart(2, '0')}`);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+  return iso(d);
+}
+const payDayBox = (f) => (f.day === 'last' ? '<b>Last</b><small>work day</small>' : `<b>${f.day}</b><small>${ordinal(+f.day).slice(-2)}</small>`);
+const payDayText = (f) => (f.day === 'last' ? 'the last working day' : `the ${ordinal(+f.day)}`);
 
 /** The entry that is this month's payment of regular income f, if there is one. */
 function receivedTxn(f, ym) {
@@ -2614,7 +2634,8 @@ function receivedTxn(f, ym) {
   const taken = new Set(S.fixed.filter((g) => g !== f && g.cat === 'income').map((g) => S.txns.find((t) => t.fixedId === g.id && monthOf(t.date) === ym)).filter(Boolean).map((t) => t.id));
   const cands = S.txns.filter((t) => t.type === 'in' && !t.fixedId && !taken.has(t.id) && t.date >= from && t.date <= to &&
     (!isPair() || !f.who || f.who === 'shared' || t.who === f.who));
-  return cands.find((t) => t.mkey === key) || cands.find((t) => usual && Math.abs(t.amt - usual) <= usual * 0.3) || null;
+  return cands.find((t) => t.mkey === key) || cands.find((t) => usual && Math.abs(t.amt - usual) <= usual * 0.3) ||
+    (!usual ? cands.find((t) => t.cat === 'income' && /salary|wage|pay/.test(t.mkey)) : null) || null;
 }
 /** Usual amount: the average of the last three real payments, or the amount set up. */
 function usualAmount(f) {
@@ -2634,8 +2655,8 @@ function logIncome(id, ym) {
   ym = ym || monthOf(todayISO());
   const pay = paydayOf(f, ym), t = todayISO();
   openSheet(`${incomeName(f)[0].toUpperCase()}${incomeName(f).slice(1)} for ${monthName(ym)}`, `<form class="form" data-form>
-    <div class="field"><label for="liAmt">Amount that arrived (£)</label><input class="input big-in" id="liAmt" inputmode="decimal" value="${(usualAmount(f) / 100).toFixed(2)}"></div>
-    <p class="hint">Usually about ${moneyR(usualAmount(f))}. Change it to what actually came in.</p>
+    <div class="field"><label for="liAmt">Amount that arrived (£)</label><input class="input big-in" id="liAmt" inputmode="decimal" value="${usualAmount(f) ? (usualAmount(f) / 100).toFixed(2) : ''}" placeholder="0.00"></div>
+    <p class="hint">${usualAmount(f) ? `Usually about ${moneyR(usualAmount(f))}. Change it to what actually came in.` : "Type what came in. Next month this amount is filled in for you."}</p>
     <div class="field"><label for="liDate">Date</label><input class="input" type="date" id="liDate" value="${pay <= t ? pay : t}"></div>
     <button class="btn primary" type="submit">Log it</button></form>`, (act, el, body) => {
     if (act !== 'submit') return;
@@ -2653,7 +2674,7 @@ function logIncome(id, ym) {
 }
 
 function paydayCards() {
-  return paydaysDue().map((f) => `<div class="notice payday"><p><b>Payday.</b> Has ${esc(incomeName(f))} arrived? It's usually about ${moneyR(usualAmount(f))}.</p>
+  return paydaysDue().map((f) => `<div class="notice payday"><p><b>Payday.</b> Has ${esc(incomeName(f))} arrived?${usualAmount(f) ? ` It's usually about ${moneyR(usualAmount(f))}.` : ''}</p>
     <div class="btns"><button type="button" class="btn primary" data-log-income="${f.id}">Log the amount</button><button type="button" class="btn" data-snooze-income="${f.id}">Not yet</button></div></div>`).join('');
 }
 
@@ -3026,6 +3047,16 @@ document.addEventListener('submit', (e) => {
     if (!n1) { $('#obName1').focus(); return; }
     if (!$('#obExamples').checked) { S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example); S.budgets = {}; } // a real start has no made-up budgets
     savePeople(n1, $('#obName2').value);
+    // paydays set on the welcome screen become regular income with payday reminders
+    const cur = monthOf(todayISO());
+    [1, 2].forEach((n) => {
+      const day = $('#obPay' + n).value, owner = S.people[n - 1];
+      if (!day || !owner || $('#obPayRow' + n).hidden) return;
+      const a = TP.parseAmount($('#obAmt' + n).value.replace(/[\s,£]/g, ''));
+      S.fixed.push({ id: uid(), desc: 'Salary', amt: a ? a.pence : 0, day: day === 'last' ? 'last' : +day, cat: 'income', who: isPair() ? owner : null,
+        start: cur, posted: [], active: true });
+    });
+    save(); refresh();
     $('#onboard').hidden = true;
     qa.input.focus();
   }
@@ -3037,6 +3068,15 @@ document.addEventListener('change', (e) => {
   if (e.target.id === 'importFile' && e.target.files[0]) { e.target.files[0].text().then(importJSON); e.target.value = ''; }
 });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; if (ui.tab === 'prefs') renderPrefs(); });
+
+// Welcome screen: payday rows follow the names as they are typed
+function obPayLabels() {
+  const n1 = $('#obName1').value.trim(), n2 = $('#obName2').value.trim();
+  $('#obPayName1').textContent = n1 || 'You';
+  $('#obPayName2').textContent = n2 || 'Partner';
+  $('#obPayRow2').hidden = !n2;
+}
+document.addEventListener('input', (e) => { if (e.target.id === 'obName1' || e.target.id === 'obName2') obPayLabels(); });
 
 // ---- 68-sync.js ----
 // ---------- Sync ----------

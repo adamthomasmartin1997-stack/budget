@@ -6,7 +6,7 @@ function renderIncome() {
   const list = inRange(from, to).sort(sortTx);
   const got = total(list);
   const prevSame = total(inRange(pm + '-01', isCur ? `${pm}-${String(Math.min(+t.slice(8), daysIn(pm))).padStart(2, '0')}` : `${pm}-${daysIn(pm)}`));
-  const regular = S.fixed.filter((f) => f.cat === 'income').sort((a, b) => a.day - b.day);
+  const regular = S.fixed.filter((f) => f.cat === 'income').sort((a, b) => (a.day === 'last' ? 32 : +a.day) - (b.day === 'last' ? 32 : +b.day));
   const expected = isCur ? regular.filter((f) => f.active && !receivedTxn(f, ym)) : [];
   const spent = total(outRange(from, to, 'all')), saved = total(saveRange(from, to, 'all'));
   const left = got - spent - saved;
@@ -25,9 +25,9 @@ function renderIncome() {
     const due = f.active && !got && days <= 0;
     const status = !f.active ? 'Paused' : got ? `Received ${shortDate(got.date)}` : days === 0 ? 'Payday today' : days < 0 ? 'Payday has passed' : days === 1 ? 'Payday tomorrow' : `Payday in ${days} days`;
     return `<li class="inc-row"><button type="button" class="fx${got ? ' paid' : ''}${f.active ? '' : ' paused'}" data-fixed="${f.id}">
-      <span class="fx-day"><b>${f.day}</b><small>${ordinal(f.day).slice(-2)}</small></span>
+      <span class="fx-day">${payDayBox(f)}</span>
       <span class="tx-main"><b>${esc(f.desc)}${f.example ? '<span class="tag">example</span>' : ''}</b><small>${isPair() ? esc(whoLabel(f.who || 'shared')) + ' · ' : ''}<span class="status ${got ? 'paid' : due ? 'due' : ''}">${esc(status)}</span></small></span>
-      <span class="tx-amt in">${got ? '+' + money(got.amt) : `<small>usually</small>${moneyR(usualAmount(f))}`}</span></button>
+      <span class="tx-amt in">${got ? '+' + money(got.amt) : usualAmount(f) ? `<small>usually</small>${moneyR(usualAmount(f))}` : ''}</span></button>
       ${due ? `<button type="button" class="btn primary inc-log" data-log-income="${f.id}">Log this month's amount</button>` : ''}</li>`;
   };
 
@@ -35,7 +35,7 @@ function renderIncome() {
     <div class="card hero"><span class="eyebrow">Money in · ${esc(monthName(ym))}</span>
       <div class="big pos">${esc(money(got).split('.')[0])}<small>.${esc(money(got).split('.')[1])}</small></div>
       ${prevSame ? `<div class="sub">${Math.abs(got - prevSame) < 100 ? 'About the same as' : `<b>${moneyR(Math.abs(got - prevSame))}</b> ${got > prevSame ? 'more' : 'less'} than`} by ${esc(isCur ? `this point in ${monthName(pm)}` : `the end of ${monthName(pm)}`)}</div>` : ''}
-      ${expected.length ? `<div class="sub">Still to come: about <b>${moneyR(expected.reduce((a, f) => a + usualAmount(f), 0))}</b> from ${expected.map((f) => `${esc(f.desc)}${isPair() && f.who && f.who !== 'shared' ? ` (${esc(f.who)})` : ''} on the ${ordinal(f.day)}`).join(', ')}</div>` : ''}
+      ${expected.length ? `<div class="sub">Still to come: ${expected.some((f) => usualAmount(f)) ? `about <b>${moneyR(expected.reduce((a, f) => a + usualAmount(f), 0))}</b> from ` : ''}${expected.map((f) => `${esc(f.desc)}${isPair() && f.who && f.who !== 'shared' ? ` (${esc(f.who)})` : ''} on ${esc(shortDate(paydayOf(f, ym)))}`).join(', ')}</div>` : ''}
       ${isPair() && got ? `<div class="legend">${S.people.concat('shared').map((w) => `<span><i class="sw ${whoClass(w)}"></i>${esc(whoLabel(w))} <b>${moneyR(total(list.filter((x) => whoOf(x) === w)))}</b></span>`).join('')}</div>` : ''}
     </div>
 

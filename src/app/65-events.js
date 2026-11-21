@@ -94,6 +94,16 @@ document.addEventListener('submit', (e) => {
     if (!n1) { $('#obName1').focus(); return; }
     if (!$('#obExamples').checked) { S.txns = S.txns.filter((x) => !x.example); S.fixed = S.fixed.filter((x) => !x.example); S.goals = S.goals.filter((x) => !x.example); S.budgets = {}; } // a real start has no made-up budgets
     savePeople(n1, $('#obName2').value);
+    // paydays set on the welcome screen become regular income with payday reminders
+    const cur = monthOf(todayISO());
+    [1, 2].forEach((n) => {
+      const day = $('#obPay' + n).value, owner = S.people[n - 1];
+      if (!day || !owner || $('#obPayRow' + n).hidden) return;
+      const a = TP.parseAmount($('#obAmt' + n).value.replace(/[\s,£]/g, ''));
+      S.fixed.push({ id: uid(), desc: 'Salary', amt: a ? a.pence : 0, day: day === 'last' ? 'last' : +day, cat: 'income', who: isPair() ? owner : null,
+        start: cur, posted: [], active: true });
+    });
+    save(); refresh();
     $('#onboard').hidden = true;
     qa.input.focus();
   }
@@ -105,3 +115,12 @@ document.addEventListener('change', (e) => {
   if (e.target.id === 'importFile' && e.target.files[0]) { e.target.files[0].text().then(importJSON); e.target.value = ''; }
 });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; if (ui.tab === 'prefs') renderPrefs(); });
+
+// Welcome screen: payday rows follow the names as they are typed
+function obPayLabels() {
+  const n1 = $('#obName1').value.trim(), n2 = $('#obName2').value.trim();
+  $('#obPayName1').textContent = n1 || 'You';
+  $('#obPayName2').textContent = n2 || 'Partner';
+  $('#obPayRow2').hidden = !n2;
+}
+document.addEventListener('input', (e) => { if (e.target.id === 'obName1' || e.target.id === 'obName2') obPayLabels(); });

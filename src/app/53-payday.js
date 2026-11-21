@@ -1,7 +1,15 @@
 // ---------- Payday ----------
 // Regular income never logs itself, because the real amount changes from month to month. On payday the app asks
 // for the actual figure. A salary typed in by hand or imported from a statement counts as received.
-const paydayOf = (f, ym) => `${ym}-${String(Math.min(f.day, daysIn(ym))).padStart(2, '0')}`;
+/** The actual payday in a month. "last" is the last working day; a payday on a weekend moves to the Friday before, as UK employers do. */
+function paydayOf(f, ym) {
+  const day = f.day === 'last' ? daysIn(ym) : Math.min(+f.day, daysIn(ym));
+  const d = fromISO(`${ym}-${String(day).padStart(2, '0')}`);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+  return iso(d);
+}
+const payDayBox = (f) => (f.day === 'last' ? '<b>Last</b><small>work day</small>' : `<b>${f.day}</b><small>${ordinal(+f.day).slice(-2)}</small>`);
+const payDayText = (f) => (f.day === 'last' ? 'the last working day' : `the ${ordinal(+f.day)}`);
 
 /** The entry that is this month's payment of regular income f, if there is one. */
 function receivedTxn(f, ym) {
@@ -12,7 +20,8 @@ function receivedTxn(f, ym) {
   const taken = new Set(S.fixed.filter((g) => g !== f && g.cat === 'income').map((g) => S.txns.find((t) => t.fixedId === g.id && monthOf(t.date) === ym)).filter(Boolean).map((t) => t.id));
   const cands = S.txns.filter((t) => t.type === 'in' && !t.fixedId && !taken.has(t.id) && t.date >= from && t.date <= to &&
     (!isPair() || !f.who || f.who === 'shared' || t.who === f.who));
-  return cands.find((t) => t.mkey === key) || cands.find((t) => usual && Math.abs(t.amt - usual) <= usual * 0.3) || null;
+  return cands.find((t) => t.mkey === key) || cands.find((t) => usual && Math.abs(t.amt - usual) <= usual * 0.3) ||
+    (!usual ? cands.find((t) => t.cat === 'income' && /salary|wage|pay/.test(t.mkey)) : null) || null;
 }
 /** Usual amount: the average of the last three real payments, or the amount set up. */
 function usualAmount(f) {
@@ -32,8 +41,8 @@ function logIncome(id, ym) {
   ym = ym || monthOf(todayISO());
   const pay = paydayOf(f, ym), t = todayISO();
   openSheet(`${incomeName(f)[0].toUpperCase()}${incomeName(f).slice(1)} for ${monthName(ym)}`, `<form class="form" data-form>
-    <div class="field"><label for="liAmt">Amount that arrived (£)</label><input class="input big-in" id="liAmt" inputmode="decimal" value="${(usualAmount(f) / 100).toFixed(2)}"></div>
-    <p class="hint">Usually about ${moneyR(usualAmount(f))}. Change it to what actually came in.</p>
+    <div class="field"><label for="liAmt">Amount that arrived (£)</label><input class="input big-in" id="liAmt" inputmode="decimal" value="${usualAmount(f) ? (usualAmount(f) / 100).toFixed(2) : ''}" placeholder="0.00"></div>
+    <p class="hint">${usualAmount(f) ? `Usually about ${moneyR(usualAmount(f))}. Change it to what actually came in.` : "Type what came in. Next month this amount is filled in for you."}</p>
     <div class="field"><label for="liDate">Date</label><input class="input" type="date" id="liDate" value="${pay <= t ? pay : t}"></div>
     <button class="btn primary" type="submit">Log it</button></form>`, (act, el, body) => {
     if (act !== 'submit') return;
@@ -51,6 +60,6 @@ function logIncome(id, ym) {
 }
 
 function paydayCards() {
-  return paydaysDue().map((f) => `<div class="notice payday"><p><b>Payday.</b> Has ${esc(incomeName(f))} arrived? It's usually about ${moneyR(usualAmount(f))}.</p>
+  return paydaysDue().map((f) => `<div class="notice payday"><p><b>Payday.</b> Has ${esc(incomeName(f))} arrived?${usualAmount(f) ? ` It's usually about ${moneyR(usualAmount(f))}.` : ''}</p>
     <div class="btns"><button type="button" class="btn primary" data-log-income="${f.id}">Log the amount</button><button type="button" class="btn" data-snooze-income="${f.id}">Not yet</button></div></div>`).join('');
 }
